@@ -21,18 +21,18 @@ class UserOTPController extends Controller
 
         $otpCode = $request->input('otp_code');
         $user_id = $request->input('user_id');
-        $status = $otpService->verifyOTP($otpCode);
+        $status = $otpService->verifyOTP($otpCode, $user_id);
 
-        $user_id = UserOTP::where('otp_code', $otpCode)->where('user_id', $user_id)->first()->user_id;
-        $user = User::find($user_id);
-        $user->status = true;
-        $user->save();
-        $token = $user->createToken('auth_token')->plainTextToken;
 
         if ($status) {
-            return $this->successResponse(['token' => $token], 'OTP verified successfully', 200);
+            $user = User::find($user_id);
+            $user->status = true;
+            $user->save();
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return $this->successResponse(['token' => $token], __('messages.otp_verified'), 200);
         } else {
-            return $this->errorResponse('Invalid or expired OTP', 400);
+            return $this->errorResponse(__('messages.invalid_or_expired_otp'), 400);
         }
     }
 
@@ -46,9 +46,9 @@ class UserOTPController extends Controller
         $data = $otpService->resendOTP($user_id);
 
         if ($data) {
-            return $this->successResponse($data, 'A new OTP has been sent to your email', 200);
+            return $this->successResponse($data, __('messages.otp_sent'), 200);
         } else {
-            return $this->errorResponse('Failed to resend OTP', 500);
+            return $this->errorResponse(__('messages.otp_send_failed'), 500);
         }
     }
 }

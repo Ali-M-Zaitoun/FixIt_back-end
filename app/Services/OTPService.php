@@ -8,10 +8,10 @@ use App\Models\UserOTP;
 
 class OTPService
 {
-    public function verifyOTP(string $otpCode)
+    public function verifyOTP(string $otpCode, $user_id)
     {
         $userOtp = UserOTP::where('otp_code', $otpCode)
-            ->where('is_used', false)
+            ->where('user_id', $user_id)
             ->where('expires_at', '>', now())
             ->first();
 
@@ -45,7 +45,7 @@ class OTPService
         // Mail::to($user->email)->send(new OtpMail($otp)); // Assuming OtpMail is a Mailable class
         return [
             'user_id' => $user_id,
-            'otp_sent' => true,
+            'otp_sent' => __('messages.true'),
             'otp_code' => $otp, // For testing purposes; remove in production
         ];
     }

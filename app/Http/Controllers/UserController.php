@@ -17,9 +17,9 @@ class UserController extends Controller
     {
         $result = $authService->signUp($request->validated());
         if ($result) {
-            return $this->successResponse($result, 'We sent an OTP to your email, please check it', 201);
+            return $this->successResponse($result, __('messages.otp_sent'), 201);
         } else {
-            return $this->errorResponse('Registration failed', 500);
+            return $this->errorResponse(__('messages.registration_failed'), 500);
         }
     }
 
@@ -32,9 +32,9 @@ class UserController extends Controller
 
         $result = $authService->login($request->only('login', 'password'));
         if (!$result) {
-            return $this->errorResponse('Invalid login credentials', 401);
+            return $this->errorResponse(__('messages.invalid_credentials'), 401);
         }
 
-        return $this->successResponse(['token' => $result], 'Login successful', 200);
+        return $this->successResponse(['token' => $result], __('messages.login_success'), 200);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Requests\SignUpRequest;
 use App\Models\User;
 use App\Models\UserOTP;
 use Illuminate\Support\Facades\Auth;
