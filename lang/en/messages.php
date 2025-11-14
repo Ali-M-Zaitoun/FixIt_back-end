@@ -17,4 +17,8 @@ return [
     'registration_failed' => 'Registration failed. Please try again.',
 
     'ministry_created' => 'Ministry has been created successfully.',
+    'ministries_fetched' => 'Ministries data fetched successfully.',
+    'ministry_branch_created' => 'Ministry\'s branch has been created successfully.',
+    'ministry_branches_fetched' => 'Ministry\'s branches data fetched successfully.',
+    'ministry_not_found' => 'Ministry not found.',
 ];

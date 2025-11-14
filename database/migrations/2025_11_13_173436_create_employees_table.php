@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('branch_id')->constrained('ministry_branches')->nullable();
+            $table->foreignId('branch_id')->nullable()->constrained('ministry_branches');
             $table->string('position');
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->timestamps();
         });
     }

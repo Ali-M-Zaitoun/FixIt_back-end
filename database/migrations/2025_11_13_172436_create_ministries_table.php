@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('ministries', function (Blueprint $table) {
             $table->id();
-            $table->string('ministry_name');
-            $table->string('abbreviation');
+            $table->string('ministry_name')->unique();
+            $table->string('abbreviation')->unique();
             $table->string('description')->nullable();
             $table->boolean('status')->default(true);
-            $table->foreignId('manager_id')->constrained('employees');
             $table->timestamps();
         });
     }

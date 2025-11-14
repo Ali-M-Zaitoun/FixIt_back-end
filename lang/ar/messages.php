@@ -17,4 +17,8 @@ return [
     'registration_failed' => 'فشل التسجيل. يرجى المحاولة مرة أخرى.',
 
     'ministry_created' => 'تم إنشاء الوزارة بنجاح.',
+    'ministries_fetched' => 'تم استرجاع بيانات الوزارات بنجاح.',
+    'ministry_branch_created' => 'تم إنشاء فرع للوزارة بنجاح.',
+    'ministry_branches_fetched' => 'تم استرجاع بيانات فروع الوزارة بنجاح.',
+    'ministry_not_found' => 'الوزارة غير موجودة.',
 ];

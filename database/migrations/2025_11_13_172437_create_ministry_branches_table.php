@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('ministry_branches', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ministry_id')->constrained('ministries');
+            $table->foreignId('ministry_id')->constrained();
             $table->string('name');
-            $table->foreignId('manager_id')->constrained('employees');
             $table->string('location');
             $table->timestamps();
         });

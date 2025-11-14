@@ -9,8 +9,8 @@ class MinistryBranch extends Model
     protected $fillable = [
         'ministry_id',
         'name',
-        'manager_id',
         'location',
+        'manager_id',
     ];
 
     public function ministry()
