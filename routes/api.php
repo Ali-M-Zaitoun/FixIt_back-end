@@ -21,6 +21,7 @@ Route::prefix('ministry')->middleware('auth:sanctum')->group(function () {
     Route::controller(MinistryController::class)->group(function () {
         Route::post('add', 'add')->middleware('role:super_admin');
         Route::get('get-ministries', 'getMinistries');
+        Route::get('get-info/{ministry_id}', 'getMinistryInfo');
     });
 
     Route::controller(MinistryBranchController::class)->group(function () {

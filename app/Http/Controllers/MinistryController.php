@@ -30,4 +30,17 @@ class MinistryController extends Controller
         $data = MinistryResource::collection($ministries);
         return $this->successResponse($data, __('messages.ministries_fetched'), 200);
     }
+
+    public function getMinistryInfo($ministry_id)
+    {
+        $ministry = Ministry::where('id', $ministry_id)->get();
+
+        if (sizeof($ministry) < 1) {
+            return $this->errorResponse(__('messages.ministry_not_found'), 404);
+        }
+
+        $data = MinistryResource::collection($ministry);
+
+        return $this->successResponse($data, __('messages.ministry_branches_fetched'), 200);
+    }
 }
