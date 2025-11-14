@@ -42,7 +42,16 @@ class AuthService
 
         $user = User::where('id', Auth::id())->first();
         $token = $user->createToken('auth_token')->plainTextToken;
-        $data = ['user' => $user, 'token' => $token];
+
+        $permissions = $user->roles
+            ->flatMap(function ($role) {
+                return $role->permissions->pluck('name');
+            })
+            ->unique()
+            ->values()
+            ->toArray();
+        $userData = collect($user->toArray())->except(['roles', 'email_verified_at', 'updated_at'])->toArray();
+        $data = ['user' => $userData, 'token' => $token, 'permissions' => $permissions];
         return $data;
     }
 }
