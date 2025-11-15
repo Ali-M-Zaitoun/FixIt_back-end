@@ -39,7 +39,6 @@ class PermissionsSeeder extends Seeder
             'complaint.update',
             'complaint.delete',
             'complaint.review',
-            'complaint.escalate',
             'complaint.resolve',
         ];
 

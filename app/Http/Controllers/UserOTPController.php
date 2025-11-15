@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RefreshToken;
 use App\Models\User;
 use App\Models\UserOTP;
 use App\Services\OTPService;
@@ -27,9 +28,8 @@ class UserOTPController extends Controller
             $user = User::find($user_id);
             $user->status = true;
             $user->save();
-            $token = $user->createToken('auth_token')->plainTextToken;
 
-            return $this->successResponse(['token' => $token], __('messages.otp_verified'), 200);
+            return $this->successResponse(__('messages.otp_verified'), 200);
         } else {
             return $this->errorResponse(__('messages.invalid_or_expired_otp'), 400);
         }

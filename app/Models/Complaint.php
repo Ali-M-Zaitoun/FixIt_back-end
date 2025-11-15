@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Complaint extends Model
 {
     protected $fillable = [
-        'reference_id',
+        'reference_number',
         'type',
         'description',
         'status',
         'citizen_id',
         'location',
         'ministry_branch_id',
+        'governorate_id',
     ];
 
     public function media()

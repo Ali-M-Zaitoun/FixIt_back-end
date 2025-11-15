@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ministry_branches', function (Blueprint $table) {
+        Schema::create('governorates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ministry_id')->constrained();
-            $table->string('name');
-            $table->foreignId('governorate_id')->constrained('governorates');
+            $table->string('name')->unique();
+            $table->string('code')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ministry_branches');
+        Schema::dropIfExists('governorates');
     }
 };

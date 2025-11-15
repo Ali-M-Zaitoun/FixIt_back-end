@@ -18,6 +18,7 @@ class RolePermissionSeeder extends Seeder
         $ministry_manager = Role::where('name', 'ministry_manager')->first();
         $branch_manager = Role::where('name', 'branch_manager')->first();
         $citizen = Role::where('name', 'citizen')->first();
+        $employee = Role::where('name', 'employee')->first();
 
         $permissions = Permission::all();
         $super_admin->syncPermissions($permissions);
@@ -42,6 +43,12 @@ class RolePermissionSeeder extends Seeder
             'complaint.read',
             'complaint.update',
             'complaint.delete',
+        ]);
+
+        $employee->syncPermissions([
+            'complaint.read',
+            'complaint.review',
+            'complaint.resolve',
         ]);
     }
 }

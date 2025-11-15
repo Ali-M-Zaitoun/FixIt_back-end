@@ -19,7 +19,9 @@ return new class extends Migration
             $table->text('description');
             $table->enum('status', ['new', 'in_progress', 'resolved', 'rejected'])->default('new');
             $table->foreignId('ministry_branch_id')->constrained();
-            $table->string('location');
+            $table->foreignId('governorate_id')->constrained();
+            $table->string('city_name')->nullable();
+            $table->string('street_name')->nullable();
             $table->timestamps();
         });
     }

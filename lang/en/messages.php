@@ -17,15 +17,18 @@ return [
     'registration_failed' => 'Registration failed. Please try again.',
 
     'ministry_created' => 'Ministry has been created successfully.',
-    'ministries_fetched' => 'Ministries data fetched successfully.',
+    'ministries_retrieved' => 'Ministries data retrieved successfully.',
     'ministry_branch_created' => 'Ministry\'s branch has been created successfully.',
-    'ministry_branches_fetched' => 'Ministry\'s branches data fetched successfully.',
+    'ministry_branches_retrieved' => 'Ministry\'s branches data retrieved successfully.',
     'ministry_not_found' => 'Ministry not found.',
+
+    'employee_added' => 'Employee has been added successfully.',
+    'employees_retrieved' => 'Employees data retrieved successfully.',
 
     'token_refreshed' => 'Token has been refreshed successfully.',
     'invalid_refresh_token' => 'Invalid refresh token.',
 
     'complaint_submitted' => 'Complaint submitted successfully.',
-    'complaints_fetched' => 'Complaints data fetched successfully.',
+    'complaints_retrieved' => 'Complaints data retrieved successfully.',
     'complaint_not_found' => 'Complaint not found.',
 ];

@@ -25,7 +25,9 @@ class SubmitComplaintRequest extends FormRequest
             'type' => 'required|string|max:255',
             'description' => 'required|string',
             'ministry_branch_id' => 'required|exists:ministry_branches,id',
-            'location' => 'required|string|max:255',
+            'governorate_id' => 'required|exists:governorates,id',
+            'city_name' => 'nullable|string|max:255',
+            'street_name' => 'nullable|string|max:255',
             'media.*' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx',
         ];
     }

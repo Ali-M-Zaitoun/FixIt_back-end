@@ -24,7 +24,7 @@ class MinistryBranchRequest extends FormRequest
         return [
             'ministry_id' => 'required|integer|exists:ministries,id',
             'name' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
+            'governorate_id' => 'required|integer|exists:governorates,id',
             'manager_id' => 'nullable|integer|exists:employees,id',
         ];
     }
