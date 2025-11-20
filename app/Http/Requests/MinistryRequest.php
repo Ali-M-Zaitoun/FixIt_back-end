@@ -22,11 +22,13 @@ class MinistryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ministry_name' => 'required|string|max:255',
-            'abbreviation' => 'required|string|max:50',
-            'description' => 'nullable|string',
-            'status' => 'required|boolean',
-            'manager_id' => 'nullable|integer|exists:employees,id',
+            'abbreviation'               => 'required|string|max:50',
+            'translations'               => 'required|array',
+            'translations.*'             => 'required|array',
+            'translations.*.name'        => 'required|string|max:255',
+            'translations.*.description' => 'nullable|string',
+            'status'                     => 'required|boolean',
+            'manager_id'                 => 'nullable|integer|exists:employees,id',
         ];
     }
 }

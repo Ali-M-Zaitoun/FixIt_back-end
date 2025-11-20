@@ -11,6 +11,7 @@ class Ministry extends Model
         'status',
         'manager_id',
     ];
+
     public function branches()
     {
         return $this->hasMany(MinistryBranch::class);

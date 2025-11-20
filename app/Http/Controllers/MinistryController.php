@@ -6,55 +6,63 @@ use App\Http\Requests\MinistryRequest;
 use App\Http\Resources\GovernorateResource;
 use App\Http\Resources\MinistryResource;
 use App\Models\Governorate;
-use App\Models\Ministry;
+use App\Services\MinistryService;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class MinistryController extends Controller
 {
     use ResponseTrait;
 
-    public function add(MinistryRequest $request)
+    protected MinistryService $service;
+    public function __construct()
+    {
+        $this->service = new MinistryService();
+    }
+
+    public function store(MinistryRequest $request)
     {
         $user = Auth::user();
-        $ministry = Ministry::create($request->validated());
+        $ministry = $this->service->store($request->validated());
+
         if ($ministry)
-            return $this->successResponse($ministry, __('messages.ministry_created'), 201);
+            return $this->successResponse($ministry, __('messages.ministry_stored'), 201);
 
         return $this->errorResponse(__('messages.registration_failed'), 500);
     }
 
-    public function getMinistries()
+    public function read()
     {
-        $ministries = Cache::remember('ministries_all', 3600, function () {
-            return Ministry::all();
-        });
-        $data = MinistryResource::collection($ministries);
-        return $this->successResponse($data, __('messages.ministries_retrieved'), 200);
+        $data = $this->service->read();
+
+        if (!$data || $data->isEmpty()) {
+            return $this->errorResponse(__('messages.not_found'), 404);
+        }
+
+        return $this->successResponse(MinistryResource::collection($data), __('messages.ministries_retrieved'), 200);
     }
 
-    public function getMinistryInfo($ministry_id)
+    public function readOne($id)
     {
-        $cacheKey = 'ministry_info_' . $ministry_id;
-        $ministry = Cache::remember($cacheKey, 3600, function () use ($ministry_id) {
-            return Ministry::where('id', $ministry_id)->get();
-        });
+        $ministry = $this->service->readOne($id);
 
-        if ($ministry->isEmpty()) {
+        if (!$ministry) {
             return $this->errorResponse(__('messages.ministry_not_found'), 404);
         }
 
-        $data = MinistryResource::collection($ministry);
+        return $this->successResponse(new MinistryResource($ministry), __('messages.ministry_retrieved'), 200);
+    }
 
-        return $this->successResponse($data, __('messages.ministry_branches_retrieved'), 200);
+    public function setManager($id, $manager_id)
+    {
+        $ministry = $this->service->setManager($id, $manager_id);
+        return $this->successResponse(new MinistryResource($ministry), __('messages.employee_promoted'), 200);
     }
 
     public function getGovernorates()
     {
-        $governorates = Cache::rememberForever('governorates_all', function () {
+        $governorates = Cache::rememberForever('governorates', function () {
             return Governorate::all();
         });
         $governorates = GovernorateResource::collection($governorates);

@@ -27,21 +27,24 @@ Route::get('get-governorates', [MinistryController::class, 'getGovernorates'])->
 
 Route::prefix('ministry')->middleware(['auth:sanctum', 'active.user'])->group(function () {
     Route::controller(MinistryController::class)->group(function () {
-        Route::post('add', 'add')->middleware('role:super_admin');
-        Route::get('get-ministries', 'getMinistries');
-        Route::get('get-info/{ministry_id}', 'getMinistryInfo');
+        Route::post('store', 'store')->middleware('role:super_admin');
+        Route::get('read', 'read');
+        Route::get('readOne/{id}', 'readOne');
+        Route::post('set-manager/{id}/{manager_id}', 'setManager');
     });
 
-    Route::controller(MinistryBranchController::class)->group(function () {
-        Route::post('branches/add', 'add')->middleware('role:super_admin');
-        Route::get('branches/{ministry_id}', 'getBranches');
+    Route::prefix('branch')->controller(MinistryBranchController::class)->group(function () {
+        Route::post('store', 'store')->middleware('role:super_admin');
+        Route::get('read', 'read');
+        Route::get('readOne/{id}', 'readOne');
     });
 });
 
 Route::prefix('employee')->middleware(['auth:sanctum', 'active.user'])->controller(EmployeeController::class)->group(function () {
-    Route::post('add', 'add')->middleware('permission:employee.create');
-    Route::get('get-employees', 'getEmployees')->middleware('permission:employee.read');
-    Route::get('get-employees/{ministry_branch_id}', 'getEmployeesInBranch')->middleware('permission:employee.read');
+    Route::post('store', 'store')->middleware('permission:employee.create');
+    Route::get('read', 'read')->middleware('permission:employee.read');
+    Route::get('readOne/{id}', 'readOne')->middleware('permission:employee.read');
+    Route::get('readEmpInBranch/{ministry_branch_id}', 'readEmpInBranch')->middleware('permission:employee.read');
 
     Route::post('promote-employee/{employee_id}', 'promoteEmployee')->middleware('permission:employee.update');
 });

@@ -10,12 +10,12 @@ class EmployeeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'user' => new UserResource($this->user),
-            'position' => $this->position,
-            'start_date' => $this->start_date->format('Y-m-d'),
-            'end_date' => $this->end_date ? $this->end_date->format('Y-m-d') : null,
-            'branch' => new MinistryBranchResource($this->branch),
+            'id'                 => $this->id,
+            'user'               => new UserResource($this->user),
+            'start_date'         => $this->start_date,
+            'end_date'           => $this->end_date ? $this->end_date : null,
+            'ministry'           => new MinistryResource($this->ministry),
+            'ministry_branch_id' => $this->ministry_branch_id ? new MinistryBranchResource($this->branch) : null
         ];
     }
 }

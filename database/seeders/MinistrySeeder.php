@@ -175,8 +175,7 @@ class MinistrySeeder extends Seeder
             ]);
 
             foreach ($item['translations'] as $locale => $trans) {
-                MinistryTranslation::create([
-                    'ministry_id' => $ministry->id,
+                $ministry->translations()->create([
                     'locale'      => $locale,
                     'name'        => $trans['name'],
                     'description' => $trans['description'],

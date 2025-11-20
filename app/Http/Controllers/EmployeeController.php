@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DAO\EmployeeDAO;
 use App\Http\Requests\AddEmployeeRequest;
 use App\Http\Resources\EmployeeResource;
+use App\Http\Resources\UserResource;
 use App\Models\Employee;
 use App\Models\User;
 use App\Services\EmployeeService;
@@ -14,24 +15,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
+use function PHPUnit\Framework\isEmpty;
+
 class EmployeeController extends Controller
 {
     use ResponseTrait;
 
-    protected $dao;
+    protected EmployeeService $service;
 
     public function __construct()
     {
-        $this->dao = new EmployeeDAO();
+        $this->service = new EmployeeService();
     }
 
-    public function add(AddEmployeeRequest $request, EmployeeService $employeeService, OTPService $otpService)
+    public function store(AddEmployeeRequest $request, OTPService $otpService)
     {
         $data = $request->validated();
-        $dataUser = $request->only(['first_name', 'last_name', 'email', 'phone', 'role', 'address']);
-        $dataUser['password'] = bcrypt($dataUser['first_name'] . '12345');
 
-        $user = $this->dao->add($data, $dataUser);
+        $user = $this->service->store($data, $otpService);
 
         if (!$user || !$user->employee) {
             $user ? $user->delete() : null;
@@ -42,54 +43,48 @@ class EmployeeController extends Controller
             );
         }
 
-        $employeeService->add($user, $otpService);
         return $this->successResponse(
-            ['employee' => $user->employee],
-            __('messages.employee_added'),
+            ['employee' => new EmployeeResource($user->employee)],
+            __('messages.employee_stored'),
             201
         );
     }
 
-    public function getEmployees()
+    public function read()
     {
-        $cacheKey = 'employees_all';
-        $employees = Cache::remember($cacheKey, 3600, function () {
-            return $this->dao->getAll();
-        });
-        $employees = EmployeeResource::collection($employees);
-        return $this->successResponse(
-            ['employees' => $employees],
-            __('messages.employees_retrieved'),
-            200
-        );
+        $data = $this->service->read();
+
+        if (!$data || $data->isEmpty()) {
+            return $this->errorResponse(__('messages.empty'), 404);
+        }
+
+        return $this->successResponse(EmployeeResource::collection($data), __('messages.employees_retrieved'));
     }
 
-    public function getEmployeesInBranch($ministry_branch_id)
+    public function readOne($id)
     {
-        $cacheKey = 'employees_branch_' . $ministry_branch_id;
-        $employees = Cache::remember($cacheKey, 3600, function () use ($ministry_branch_id) {
-            return $this->dao->getEmployeesInBranch($ministry_branch_id);
-        });
+        $data = $this->service->readOne($id);
 
-        $employees = EmployeeResource::collection($employees);
-        return $this->successResponse(
-            ['employees' => $employees],
-            __('messages.employees_retrieved'),
-            200
-        );
+        if (!$data) {
+            return $this->errorResponse(__('messages.not_found'), 404);
+        }
+
+        return $this->successResponse(new EmployeeResource($data), __('messages.employee_retrieved'));
     }
 
-    public function promoteEmployee(Request $request, $employee_id, EmployeeService $employeeService)
+    public function promoteEmployee(Request $request, $id)
     {
         $request->validate([
-            'new_position' => 'required|string|max:255',
-            'new_end_date' => 'nullable|date|after_or_equal:start_date',
+            'new_role' => 'required|string|max:255',
+            'new_end_date' => 'nullable|date',
+            'ministry_id' => 'nullable|exists:ministries,id',
+            'ministry_branch_id' => 'nullable|exists:ministry_branches,id'
         ]);
 
-        $new_position = $request->input('new_position');
+        $new_role = $request->input('new_role');
         $new_end_date = $request->input('new_end_date');
 
-        $employee = $employeeService->promoteEmployee($employee_id, $new_position, $new_end_date);
+        $employee = $this->service->promoteEmployee($id, $new_role, $new_end_date);
 
         return $this->successResponse(
             ['employee' => $employee],

@@ -32,4 +32,9 @@ class MinistryBranch extends Model
         $locale = $locale ?: app()->getLocale();
         return $this->translations->where('locale', $locale)->first();
     }
+
+    public function governorate()
+    {
+        return $this->belongsTo(Governorate::class);
+    }
 }

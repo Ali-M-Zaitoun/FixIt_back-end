@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             GovernorateSeeder::class,
             MinistrySeeder::class,
+            MinistryBranchSeeder::class
         ]);
     }
 }

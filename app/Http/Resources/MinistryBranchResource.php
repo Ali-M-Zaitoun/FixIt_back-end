@@ -16,9 +16,7 @@ class MinistryBranchResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $translation ? $translation->name : null,
-            'governorate_id' => $this->governorate_id,
-            'governorate_name' => DB::table('governorates')->where('id', $this->governorate_id)->value('name'),
-            'governorate_code' => DB::table('governorates')->where('id', $this->governorate_id)->value('code'),
+            'governorate' => new GovernorateResource($this->governorate),
             'ministry_id' => $this->ministry_id,
             'created_at' => $this->created_at->format('Y-m-d H:i A'),
         ];

@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\DAO\MinistryBranchDAO;
 use App\Http\Requests\MinistryBranchRequest;
+use App\Http\Resources\MinistryBranchResource;
 use App\Http\Resources\MinistryResource;
 use App\Models\Ministry;
 use App\Models\MinistryBranch;
+use App\Services\MinistryBranchService;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 
@@ -13,25 +16,46 @@ class MinistryBranchController extends Controller
 {
     use ResponseTrait;
 
-    public function add(MinistryBranchRequest $request)
+    protected MinistryBranchService $service;
+
+    public function __construct()
     {
-        $ministryBranch = MinistryBranch::create($request->validated());
+        $this->service = new MinistryBranchService();
+    }
+
+    public function store(MinistryBranchRequest $request)
+    {
+        $ministryBranch = $this->service->store($request->validated());
+
         if ($ministryBranch) {
             return $this->successResponse($ministryBranch, __('messages.ministry_branch_created'), 201);
         }
-        return $this->errorResponse(__('messages.registration_failed'), 500);
+        return $this->errorResponse(__('messages.failed'), 500);
     }
 
-    public function getBranches($ministry_id)
+    public function read()
     {
-        $ministry = Ministry::where('id', $ministry_id)->get();
+        $data = $this->service->read();
 
-        if (sizeof($ministry) < 1) {
-            return $this->errorResponse(__('messages.ministry_not_found'), 404);
+        if (sizeof($data) < 1) {
+            return $this->errorResponse(__('messages.error'));
         }
 
-        $data = MinistryResource::collection($ministry);
+        return $this->successResponse($data, __('messages.ministries_branches_retrieved'));
+    }
 
-        return $this->successResponse($data, __('messages.ministry_branches_fetched'), 200);
+    public function readOne($id)
+    {
+        $data = $this->service->readOne($id);
+        if (!$data) {
+            return $this->errorResponse(__('messages.ministry_not_found'), 404);
+        }
+        return $this->successResponse($data, __('messages.ministry_branches_retrieved'));
+    }
+
+    public function setManager($id, $manager_id)
+    {
+        $branch = $this->service->setManager($id, $manager_id);
+        return $this->successResponse(MinistryBranchResource::collection($branch), __('messages.employee_promoted'), 200);
     }
 }

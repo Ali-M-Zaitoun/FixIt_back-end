@@ -7,25 +7,25 @@ use App\Models\User;
 
 class EmployeeDAO
 {
-    public function add($data, $dataUser)
+    public function store($data, $dataUser)
     {
         $user = User::create($dataUser);
-        $employee = $user->employee()->create([
-            'position' => $data['position'],
-            'start_date' => $data['start_date'],
-            'ministry_branch_id' => $data['branch_id'] ?? null,
-            'end_date' => $data['end_date'] ?? null,
+        $user->employee()->create([
+            'ministry_id'         => $data['ministry_id'],
+            'ministry_branch_id'  => $data['ministry_branch_id'] ?? null,
+            'start_date'          => $data['start_date'],
+            'end_date'            => $data['end_date'] ?? null,
         ]);
 
         return $user;
     }
 
-    public function findById($id)
+    public function readOne($id)
     {
-        return Employee::find($id);
+        return Employee::where('id', $id)->first();
     }
 
-    public function getAll()
+    public function read()
     {
         return Employee::all();
     }

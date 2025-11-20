@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('ministry_branch_translations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('ministry_branch_id')->constrained()->onDelete('cascade');
+            $table->string('locale');
+            $table->string('name');
             $table->timestamps();
         });
     }

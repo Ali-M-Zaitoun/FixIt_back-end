@@ -14,10 +14,10 @@ class AddEmployeeRequest extends BaseUserRequest
     public function rules(): array
     {
         return array_merge($this->commonRules(), [
-            'position' => 'required|string|max:255',
-            'start_date' => 'required|date',
-            'branch_id' => 'nullable|exists:ministry_branches,id',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'ministry_id'          => 'required|exists:ministries,id',
+            'ministry_branch_id'   => 'nullable|exists:ministry_branches,id',
+            'start_date'           => 'required|date',
+            'end_date'             => 'nullable|date|after_or_equal:start_date',
         ]);
     }
 }

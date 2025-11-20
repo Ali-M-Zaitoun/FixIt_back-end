@@ -4,9 +4,12 @@ namespace App\Services;
 
 use App\DAO\EmployeeDAO;
 use App\Http\Requests\BaseUserRequest;
+use App\Http\Resources\EmployeeResource;
 use App\Models\User;
 use App\Models\UserOTP;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class EmployeeService
 {
@@ -17,15 +20,40 @@ class EmployeeService
         $this->dao = new EmployeeDAO();
     }
 
-    public function add($user, OTPService $otpService)
+    public function store($data, OTPService $otpService)
     {
-        $user->assignRole('employee');
+        $dataUser = Arr::only($data, ['first_name', 'last_name', 'email', 'phone', 'role', 'address']);
+        $dataUser['password'] = bcrypt($dataUser['first_name'] . '12345');
+
+        $user = $this->dao->store($data, $dataUser);
+        $user->syncRoles($data['role']);
         $otpService->resendOTP($user->id);
+        return $user;
     }
 
-    public function promoteEmployee($employee_id, $new_position, $new_end_date = null)
+    public function read()
     {
-        $employee = $this->dao->findById($employee_id);
+        $cacheKey = "all_employees";
+        $employees = Cache::remember($cacheKey, 3600, function () {
+            return $this->dao->read();
+        });
+
+        return $employees;
+    }
+
+    public function readOne($id)
+    {
+        $cacheKey = "employee {$id}";
+        $employee = Cache::remember($cacheKey, 3600, function () use ($id) {
+            return $this->dao->readOne($id);
+        });
+
+        return $employee;
+    }
+
+    public function promoteEmployee($id, $new_role, $new_end_date = null)
+    {
+        $employee = $this->dao->readOne($id);
         $user = Auth::user();
 
         $promotionRules = [
@@ -39,17 +67,17 @@ class EmployeeService
             ],
         ];
 
-        if (!isset($promotionRules[$new_position])) {
+        if (!isset($promotionRules[$new_role])) {
             throw new \Exception(__('messages.invalid_promotion_position'), 403);
         }
 
-        $allowedRoles = $promotionRules[$new_position]['allowed_roles'];
+        $allowedRoles = $promotionRules[$new_role]['allowed_roles'];
         if (!$user->hasAnyRole($allowedRoles)) {
             throw new \Exception(__('messages.unauthorized_promotion'), 403);
         }
 
-        $updatedEmployee = $this->dao->updatePosition($employee, $new_position, $new_end_date);
-        $updatedEmployee->user->syncRoles($promotionRules[$new_position]['sync_roles']);
+        $updatedEmployee = $this->dao->updatePosition($employee, $new_role, $new_end_date);
+        $updatedEmployee->user->syncRoles($promotionRules[$new_role]['sync_roles']);
 
         return $updatedEmployee;
     }

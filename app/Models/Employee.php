@@ -8,9 +8,9 @@ class Employee extends Model
 {
     protected $fillable = [
         'user_id',
-        'position',
-        'start_date',
+        'ministry_id',
         'ministry_branch_id',
+        'start_date',
         'end_date',
         'promoted_at',
     ];
@@ -22,6 +22,11 @@ class Employee extends Model
 
     public function branch()
     {
-        return $this->belongsTo(MinistryBranch::class);
+        return $this->belongsTo(MinistryBranch::class, 'ministry_branch_id');
+    }
+
+    public function ministry()
+    {
+        return $this->belongsTo(Ministry::class);
     }
 }

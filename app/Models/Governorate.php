@@ -18,4 +18,9 @@ class Governorate extends Model
         $locale = $locale ?: app()->getLocale();
         return $this->translations->where('locale', $locale)->first();
     }
+
+    public function MinistryBranches()
+    {
+        return $this->hasMany(MinistryBranch::class);
+    }
 }
