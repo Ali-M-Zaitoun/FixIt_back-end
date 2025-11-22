@@ -52,6 +52,8 @@ return [
     'complaints_retrieved'          => 'Complaints data retrieved successfully.',
     'complaint_not_found'           => 'Complaint not found.',
 
+    'citizens_retrieved'            => 'Citizens data retrieved successfully.',
+    'citizen_retrieved'             => 'Citizen data retrieved successfully.',
     'citizen_updated'               => 'Citizen information has been updated successfully.',
     'user_not_found'                => 'User not found.',
 

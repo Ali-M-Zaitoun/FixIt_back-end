@@ -49,6 +49,8 @@ return [
     'complaints_retrieved'          => 'تم استرجاع بيانات الشكاوى بنجاح.',
     'complaint_not_found'           => 'الشكوى غير موجودة.',
 
+    'citizens_retrieved'            => 'تم استرجاع بيانات المواطنين بنجاح.',
+    'citizen_retrieved'            => 'تم استرجاع بيانات المواطن بنجاح.',
     'citizen_updated'               => 'تم تحديث معلومات المواطن بنجاح.',
     'user_not_found'                => 'المستخدم غير موجود.',
 

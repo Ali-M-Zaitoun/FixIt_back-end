@@ -6,10 +6,26 @@ use App\Models\Citizen;
 
 class CitizenDAO
 {
-    public function findById($citizen_id)
+    public function read()
     {
-        return Citizen::where('id', $citizen_id)->get();
+        return Citizen::all();
     }
 
-    public function completeInfo(array $data) {}
+    public function findById($id)
+    {
+        return Citizen::where('id', $id)->first();
+    }
+
+    public function completeInfo($id, array $data)
+    {
+        $citizen = $this->findById($id);
+        $citizen->fill([
+            'national_id' => $data['national_id'] ?? $citizen->national_id,
+            'nationality' => $data['nationality'] ?? $citizen->nationality,
+        ]);
+
+        if ($citizen->isDirty()) {
+            $citizen->save();
+        }
+    }
 }

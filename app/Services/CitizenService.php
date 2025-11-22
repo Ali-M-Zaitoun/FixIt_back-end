@@ -2,58 +2,50 @@
 
 namespace App\Services;
 
-use App\DAO\MinistryDAO;
+use App\DAO\CitizenDAO;
 use App\Http\Resources\MinistryResource;
+use App\Models\Citizen;
 use Illuminate\Support\Facades\Cache;
 
-class MinistryService
+class CitizenService
 {
     protected $dao;
 
     public function __construct()
     {
-        $this->dao = new MinistryDAO();
-    }
-
-    public function store(array $data)
-    {
-        $ministry = $this->dao->store($data);
-        Cache::forget('all_ministries');
-        return $ministry;
+        $this->dao = new CitizenDAO();
     }
 
     public function read()
     {
-        $cacheKey = "all_ministries";
-        $ministries = Cache::remember($cacheKey, 86400, function () {
-            return $this->dao->readAll();
+        $cacheKey = "citizenn";
+        return Cache::remember($cacheKey, 1800, function () {
+            return $this->dao->read();
         });
-
-        return $ministries;
     }
 
     public function readOne($id)
     {
-        $cacheKey = "Ministry {$id}";
-        $ministry = Cache::remember($cacheKey, 3600, function () use ($id) {
-            return $this->dao->readOne($id);
+        $cacheKey = "citizen {$id}";
+        return Cache::remember($cacheKey, 1800, function () use ($id) {
+            return $this->dao->findById($id);
         });
-
-        return $ministry;
     }
 
-    public function assignManager($id, $manager_id)
+    public function completeInfo($data, $citizen)
     {
-        $emp = (new EmployeeService())->readOne($manager_id);
-        $user = $emp->user;
-        $user->syncRoles(['employee', 'ministry_manager']);
+        $this->dao->completeInfo($citizen->id, $data);
 
-        if ($id != $emp->ministry_id)
-            return false;
+        if (isset($data['img'])) {
+            app(FileManagerService::class)->storeFile(
+                $citizen,
+                $data['img'],
+                "citizen/{$citizen->id}",
+                'image',
+                fn() => 'img'
+            );
+        }
 
-        Cache::forget("Ministry {$id}");
-        $ministry = $this->dao->assignManager($id, $manager_id);
-
-        return $ministry;
+        return $citizen;
     }
 }

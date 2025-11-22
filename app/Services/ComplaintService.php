@@ -23,20 +23,17 @@ class ComplaintService
         $this->dao = new ComplaintDAO();
     }
 
-
     public function submitComplaint(array $data, FileManagerService $fileManagerService)
     {
         $media = $data['media'] ?? null;
-        unset($data['media']);
-        unset($data['locked_by']);
-        unset($data['locked_at']);
+        unset($data['media'], $data['locked_by'], $data['locked_at']);
 
         $data['citizen_id'] = Auth::user()->citizen->id;
 
-        $ministryBranch = (new MinistryBranchService())->readOne($data['ministry_branch_id']);
+        $ministryBranch = app(MinistryBranchService::class)->readOne($data['ministry_branch_id']);
         $ministryAbbr = $ministryBranch->ministry->abbreviation;
 
-        $governorateCode = (new GovernorateDAO())->readOne($data['governorate_id'])->code;
+        $governorateCode = app(GovernorateDAO::class)->readOne($data['governorate_id'])->code;
 
         $data['reference_number'] = sprintf(
             '%s_%s_%s',
@@ -47,12 +44,18 @@ class ComplaintService
 
         $complaint = $this->dao->submit($data);
 
-        $fileManagerService->storeComplaintMedia(
+        $fileManagerService->storeFile(
             $complaint,
             $media,
-            $ministryAbbr,
-            $governorateCode,
-            $data['reference_number']
+            folderPath: sprintf(
+                'complaints/%s/%s/%s/%s',
+                now()->format('Y/m/d'),
+                $ministryAbbr,
+                $governorateCode,
+                $data['reference_number']
+            ),
+            relationName: 'media',
+            typeResolver: fn($file) => $fileManagerService->detectFileType($file)
         );
         return $complaint;
     }

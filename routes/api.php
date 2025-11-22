@@ -68,4 +68,6 @@ Route::prefix('employee')->middleware(['auth:sanctum', 'active.user'])->controll
 
 Route::prefix('citizen')->middleware(['auth:sanctum', 'active.user'])->controller(CitizenController::class)->group(function () {
     Route::post('complete-info', 'completeInfo');
+    Route::get('read', 'read');
+    Route::get('read/{id}', 'readOne');
 });
