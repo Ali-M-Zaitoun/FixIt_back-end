@@ -54,4 +54,13 @@ class CitizenController extends Controller
         }
         return $this->successResponse(new CitizenResource($citizen), __('messages.citizen_retrieved'));
     }
+
+    public function myAccount()
+    {
+        $citizen = $this->service->readOne(Auth::user()->citizen->id);
+        if (!$citizen) {
+            return $this->errorResponse(__('messages.user_not_found'), 404);
+        }
+        return $this->successResponse(new CitizenResource($citizen), __('messages.citizen_retrieved'));
+    }
 }

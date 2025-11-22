@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SignUpRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
 use App\Traits\ResponseTrait;
@@ -34,7 +35,7 @@ class UserController extends Controller
         if (!$result) {
             return $this->errorResponse(__('messages.invalid_credentials'), 401);
         }
-
+        $result['user'] = new UserResource($result['user']);
         return $this->successResponse($result, __('messages.login_success'), 200);
     }
 

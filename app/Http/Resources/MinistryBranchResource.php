@@ -18,6 +18,7 @@ class MinistryBranchResource extends JsonResource
             'name' => $translation ? $translation->name : null,
             'governorate' => new GovernorateResource($this->governorate),
             'ministry_id' => $this->ministry_id,
+            'ministry_name' => $this->ministry->translation($locale)->name,
             'created_at' => $this->created_at->format('Y-m-d H:i A'),
         ];
     }

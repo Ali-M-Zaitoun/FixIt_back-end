@@ -72,4 +72,5 @@ Route::prefix('citizen')->middleware(['auth:sanctum', 'active.user'])->controlle
     Route::post('complete-info', 'completeInfo');
     Route::get('read', 'read');
     Route::get('read/{id}', 'readOne');
+    Route::get('myAccount', 'myAccount');
 });

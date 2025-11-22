@@ -81,8 +81,7 @@ class AuthService
             ->values()
             ->toArray();
 
-        $userData = collect($user->toArray())->except(['roles', 'email_verified_at', 'updated_at'])->toArray();
-        $data = ['user' => $userData, 'tokens' => $token, 'permissions' => $permissions];
+        $data = ['user' => $user, 'tokens' => $token, 'permissions' => $permissions];
         return $data;
     }
 
