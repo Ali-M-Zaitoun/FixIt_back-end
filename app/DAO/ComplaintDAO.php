@@ -6,6 +6,8 @@ use App\Models\Complaint;
 use App\Models\Employee;
 use App\Services\MinistryService;
 
+use function Symfony\Component\Clock\now;
+
 class ComplaintDAO
 {
     public function submit($data)
@@ -35,6 +37,25 @@ class ComplaintDAO
     public function readOne($id)
     {
         return Complaint::where('id', $id)->first();
+    }
+
+    public function lock($complaint, $emp_id)
+    {
+        $complaint->update([
+            'locked_by' => $emp_id,
+            'locked_at' => now()
+        ]);
+        return $complaint;
+    }
+
+    public function unlock($id)
+    {
+        $complaint = $this->readOne($id);
+        $complaint->update([
+            'locked_by' => null,
+            'locked_at' => null
+        ]);
+        return $complaint;
     }
 
     public function updateStatus($id, $status)

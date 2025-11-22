@@ -142,4 +142,28 @@ class ComplaintService
         $this->dao->addReply($complaint->id, Employee::where('user_id', $user_id)->first(), $message);
         return true;
     }
+
+    public function startProcessing($id, $emp_id)
+    {
+        $complaint = $this->dao->readOne($id);
+        if (
+            $complaint->locked_by &&
+            $complaint->locked_by != $emp_id &&
+            $complaint->locked_at > now()->subMinutes(15)
+        ) {
+            return false;
+        }
+
+        $this->dao->lock($complaint, $emp_id);
+
+        if ($complaint->status !== 'in_progress')
+            $complaint->update(['status' => 'in_progress']);
+
+        return true;
+    }
+
+    public function addReply($id, $data)
+    {
+        $complaint = $this->dao->readOne($id);
+    }
 }

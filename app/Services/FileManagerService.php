@@ -24,7 +24,7 @@ class FileManagerService
             ]);
         }
     }
-    
+
     public function detectFileType($file)
     {
         return in_array(strtolower($file->getClientOriginalExtension()), ['pdf', 'doc', 'docx'])

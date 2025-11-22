@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckEmployeeAccessToComplaint;
 use App\Http\Middleware\CheckUserActive;
 use App\Http\Middleware\SetLocaleFromHeader;
 use Illuminate\Foundation\Application;
@@ -24,8 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'active.user' => CheckUserActive::class,
+            'check.employee.access' => \App\Http\Middleware\CheckEmployeeAccessToComplaint::class,
         ]);
-        $middleware->append(HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

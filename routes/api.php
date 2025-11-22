@@ -28,8 +28,9 @@ Route::prefix('complaint')
         Route::get('/', 'read')->middleware('permission:complaint.read');
         Route::get('/{complaint_id}', 'readOne')->middleware('permission:complaint.review');
 
-        Route::post('updateStatus/{id}', 'updateStatus')->middleware('permission:complaint.resolve');
-        Route::post('addReply', 'addReply');
+        Route::post('startProcessing/{id}/{emp_id}', 'startProcessing')->middleware(['permission:complaint.process', 'check.employee.access']);
+        Route::post('updateStatus/{id}', 'updateStatus')->middleware(['permission:complaint.process', 'check.employee.access']);
+        Route::post('addReply', 'addReply')->middleware(['check.employee.access']);
     });
 
 Route::get('get-governorates', [MinistryController::class, 'getGovernorates'])->middleware(['auth:sanctum', 'active.user']);

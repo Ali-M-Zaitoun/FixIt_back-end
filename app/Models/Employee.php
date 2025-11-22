@@ -34,4 +34,9 @@ class Employee extends Model
     {
         return $this->morphMany(Reply::class, 'sender');
     }
+
+    public function canAccessComplaint($complaint)
+    {
+        return ($this->ministry_branch_id === $complaint->ministry_branch_id) || ($this->user->hasRole('ministry_manager'));
+    }
 }

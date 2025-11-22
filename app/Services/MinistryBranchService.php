@@ -43,8 +43,11 @@ class MinistryBranchService
 
     public function assignManager($id, $manager_id)
     {
+        $emp = (new EmployeeService())->readOne($manager_id);
         Cache::forget("Branch {$id}");
         $ministry = $this->dao->assignManager($id, $manager_id);
+
+        $emp->user->syncRoles(['employee', 'branch_manager']);
 
         return $ministry;
     }

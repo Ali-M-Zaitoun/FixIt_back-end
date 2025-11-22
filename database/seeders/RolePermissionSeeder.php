@@ -47,8 +47,7 @@ class RolePermissionSeeder extends Seeder
 
         $employee->syncPermissions([
             'complaint.read',
-            'complaint.review',
-            'complaint.resolve',
+            'complaint.process',
         ]);
     }
 }

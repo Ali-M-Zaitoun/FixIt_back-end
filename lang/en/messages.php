@@ -13,6 +13,7 @@ return [
     'user_inactive'                 => 'Your account is not activated yet. Please check your email or enter the OTP code.',
     'invalid_credentials'           => 'Invalid email or password.',
     'unauthorized'                  => 'You are not authorized to perform this action.',
+    'access_denied'                 => 'You do not have permission to access this complaint.',
     'login_success'                 => 'Login successful! Welcome aboard.',
     'logout_success'                => 'Logout successful! See you later.',
     'otp_sent'                      => 'OTP has been sent to your email. Please check it.',
@@ -51,6 +52,8 @@ return [
     'complaint_submitted'           => 'Complaint submitted successfully.',
     'complaints_retrieved'          => 'Complaints data retrieved successfully.',
     'complaint_not_found'           => 'Complaint not found.',
+    'complaint_locked_by_other'     => 'This complaint is being processed by another employee.',
+    'complaint_started_processing'  => 'Processing of this complaint has started.',
 
     'citizens_retrieved'            => 'Citizens data retrieved successfully.',
     'citizen_retrieved'             => 'Citizen data retrieved successfully.',

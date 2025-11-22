@@ -38,8 +38,7 @@ class PermissionsSeeder extends Seeder
             'complaint.read',
             'complaint.update',
             'complaint.delete',
-            'complaint.review',
-            'complaint.resolve',
+            'complaint.process',
         ];
 
         foreach ($permissions as $permission) {

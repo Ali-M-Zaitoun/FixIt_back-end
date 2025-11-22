@@ -70,6 +70,9 @@ class ComplaintController extends Controller
     {
         $user = Auth::user();
         $complaints = $this->service->getByMinistry($id, $user);
+        if (!$complaints) {
+            return $this->errorResponse(__('messages.unauthorized'), 401);
+        }
         if ($complaints->isEmpty()) {
             return $this->successResponse([], __('messages.empty'));
         }
@@ -81,6 +84,10 @@ class ComplaintController extends Controller
     {
         $user = Auth::user();
         $complaints = $this->service->getByBranch($id, $user);
+        if (!$complaints) {
+            return $this->errorResponse(__('messages.unauthorized'), 401);
+        }
+
         if ($complaints->isEmpty()) {
             return $this->successResponse([], __('messages.empty'));
         }
@@ -115,5 +122,23 @@ class ComplaintController extends Controller
             return $this->successResponse([], __('messages.complaint_status_updated'));
 
         return $this->errorResponse(__('messages.error'));
+    }
+
+    public function addReply($id, Request $request)
+    {
+        $request->validate([
+            'content' => 'required|string|max:500'
+        ]);
+
+        $result = $this->service->addReply($id, $request->all());
+    }
+
+    public function startProcessing($id, $emp_id)
+    {
+        $result = $this->service->startProcessing($id, $emp_id);
+        if (!$result)
+            return $this->errorResponse(__('messages.complaint_locked_by_other'));
+
+        return $this->successResponse([], __('messages.complaint_started_processing'));
     }
 }

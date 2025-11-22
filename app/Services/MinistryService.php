@@ -50,7 +50,7 @@ class MinistryService
 
         Cache::forget("Ministry {$id}");
         $ministry = $this->dao->assignManager($id, $manager_id);
-
+        $emp->user->syncRoles(['employee', 'ministry_manager']);
         return $ministry;
     }
 }
