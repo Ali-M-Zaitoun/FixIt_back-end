@@ -29,4 +29,9 @@ class Employee extends Model
     {
         return $this->belongsTo(Ministry::class);
     }
+
+    public function replies()
+    {
+        return $this->morphMany(Reply::class, 'sender');
+    }
 }

@@ -8,9 +8,11 @@ use App\Http\Requests\SubmitComplaintRequest;
 use App\Http\Resources\ComplaintResource;
 use App\Models\Citizen;
 use App\Models\Complaint;
+use App\Models\Employee;
 use App\Models\MinistryBranch;
 use App\Models\User;
 use App\Services\ComplaintService;
+use App\Services\EmployeeService;
 use App\Services\FileManagerService;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
@@ -46,7 +48,7 @@ class ComplaintController extends Controller
     {
         $complaints = $this->service->read();
         if ($complaints->isEmpty()) {
-            return $this->errorResponse(__('messages.empty'), 404);
+            return $this->successResponse([], __('messages.empty'));
         }
         return $this->successResponse(ComplaintResource::collection($complaints), __('messages.complaints_retrieved'));
     }
@@ -69,7 +71,7 @@ class ComplaintController extends Controller
         $user = Auth::user();
         $complaints = $this->service->getByMinistry($id, $user);
         if ($complaints->isEmpty()) {
-            return $this->errorResponse(__('messages.empty'), 404);
+            return $this->successResponse([], __('messages.empty'));
         }
 
         return $this->successResponse(ComplaintResource::collection($complaints), __('messages.complaints_retrieved'));
@@ -80,7 +82,7 @@ class ComplaintController extends Controller
         $user = Auth::user();
         $complaints = $this->service->getByBranch($id, $user);
         if ($complaints->isEmpty()) {
-            return $this->errorResponse(__('messages.empty'), 404);
+            return $this->successResponse([], __('messages.empty'));
         }
 
         return $this->successResponse(ComplaintResource::collection($complaints), __('messages.complaints_retrieved'));
@@ -100,25 +102,18 @@ class ComplaintController extends Controller
             __('messages.complaint_retrieved'),
         );
     }
-    // public function readComplaint($complaint_id)
-    // {
-    //     $complaint = $this->service->findById($complaint_id);
-    //     if (!$complaint) {
-    //         return $this->errorResponse(
-    //             [],
-    //             __('messages.complaint_not_found'),
-    //             404
-    //         );
-    //     }
-    //     $cacheKey = 'complaint_' . $complaint_id;
 
-    //     $complaint = Cache::remember($cacheKey, 3600, function () use ($complaint_id) {
-    //         return Complaint::find($complaint_id);
-    //     });
-    //     $complaint = new ComplaintResource($complaint);
-    //     return $this->successResponse(
-    //         ['complaint' => $complaint],
-    //         __('messages.complaint_retrieved'),
-    //     );
-    // }
+    public function updateStatus($id, Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:resolved,rejected',
+            'reason' => 'nullable|string|max:500'
+        ]);
+
+        $result = $this->service->updateStatus($id, $request->status, $request->reason, Auth::id());
+        if ($result)
+            return $this->successResponse([], __('messages.complaint_status_updated'));
+
+        return $this->errorResponse(__('messages.error'));
+    }
 }

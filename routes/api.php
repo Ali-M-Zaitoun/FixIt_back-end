@@ -19,13 +19,16 @@ Route::post('resend-otp', [UserOTPController::class, 'resendOtp']);
 
 Route::prefix('complaint')
     ->middleware(['auth:sanctum', 'active.user'])
+
     ->controller(ComplaintController::class)
     ->group(function () {
 
         Route::post('submit', 'submit');
-        Route::get('/', 'read')->middleware('permission:complaint.read');
-        Route::get('/{complaint_id}', 'readOne')->middleware('permission:complaint.read');
         Route::get('my', 'getMyComplaints');
+        Route::get('/', 'read')->middleware('permission:complaint.read');
+        Route::get('/{complaint_id}', 'readOne')->middleware('permission:complaint.review');
+
+        Route::post('updateStatus/{id}', 'updateStatus')->middleware('permission:complaint.resolve');
     });
 
 Route::get('get-governorates', [MinistryController::class, 'getGovernorates'])->middleware(['auth:sanctum', 'active.user']);
@@ -57,7 +60,8 @@ Route::prefix('employee')->middleware(['auth:sanctum', 'active.user'])->controll
     Route::post('store', 'store')->middleware('permission:employee.create');
     Route::get('read', 'read')->middleware('permission:employee.read');
     Route::get('readOne/{id}', 'readOne')->middleware('permission:employee.read');
-    Route::get('readEmpInBranch/{ministry_branch_id}', 'readEmpInBranch')->middleware('permission:employee.read');
+    Route::get('getByBranch/{branch_id}', 'getByBranch')->middleware('permission:employee.read');
+    Route::get('getByMinistry/{ministry_id}', 'getByMinistry')->middleware('permission:employee.read');
 
     Route::post('promote-employee/{employee_id}', 'promoteEmployee')->middleware('permission:employee.update');
 });

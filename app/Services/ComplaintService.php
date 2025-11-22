@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\DAO\ComplaintDAO;
+use App\DAO\GovernorateDAO;
 use App\Http\Resources\ComplaintResource;
 use App\Models\Complaint;
+use App\Models\Employee;
+use App\Models\Governorate;
 use App\Models\MinistryBranch;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -25,15 +28,15 @@ class ComplaintService
     {
         $media = $data['media'] ?? null;
         unset($data['media']);
+        unset($data['locked_by']);
+        unset($data['locked_at']);
 
         $data['citizen_id'] = Auth::user()->citizen->id;
 
-        $ministryBranch = MinistryBranch::with('ministry')->findOrFail($data['ministry_branch_id']);
+        $ministryBranch = (new MinistryBranchService())->readOne($data['ministry_branch_id']);
         $ministryAbbr = $ministryBranch->ministry->abbreviation;
 
-        $governorateCode = DB::table('governorates')
-            ->where('id', $data['governorate_id'])
-            ->value('code');
+        $governorateCode = (new GovernorateDAO())->readOne($data['governorate_id'])->code;
 
         $data['reference_number'] = sprintf(
             '%s_%s_%s',
@@ -42,7 +45,7 @@ class ComplaintService
             Str::random(8)
         );
 
-        $complaint = Complaint::create($data);
+        $complaint = $this->dao->submit($data);
 
         $fileManagerService->storeComplaintMedia(
             $complaint,
@@ -123,5 +126,17 @@ class ComplaintService
         return Cache::remember($cacheKey, 3600, function () use ($id) {
             return $this->dao->readOne($id);
         });
+    }
+
+    public function updateStatus($id, $status, $reason = "", $user_id)
+    {
+        $complaint = $this->dao->updateStatus($id, $status);
+
+        $message = $status === 'resolved'
+            ? __('messages.complaint_resolved')
+            : __('messages.complaint_rejected') . $reason;
+
+        $this->dao->addReply($complaint->id, Employee::where('user_id', $user_id)->first(), $message);
+        return true;
     }
 }

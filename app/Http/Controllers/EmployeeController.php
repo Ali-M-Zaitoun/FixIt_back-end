@@ -55,7 +55,7 @@ class EmployeeController extends Controller
         $data = $this->service->read();
 
         if (!$data || $data->isEmpty()) {
-            return $this->errorResponse(__('messages.empty'), 404);
+            return $this->successResponse([], __('messages.empty'));
         }
 
         return $this->successResponse(EmployeeResource::collection($data), __('messages.employees_retrieved'));
@@ -66,11 +66,32 @@ class EmployeeController extends Controller
         $data = $this->service->readOne($id);
 
         if (!$data) {
-            return $this->errorResponse(__('messages.not_found'), 404);
+            return $this->successResponse([], __('messages.not_found'));
         }
 
         return $this->successResponse(new EmployeeResource($data), __('messages.employee_retrieved'));
     }
+
+    public function getByBranch($branch_id)
+    {
+        $data = $this->service->getByBranch($branch_id);
+
+        if ($data->isEmpty()) {
+            return $this->successResponse([], __('messages.empty'));
+        }
+        return $this->successResponse(EmployeeResource::collection($data), __('messages.employees_retrieved'));
+    }
+
+    public function getByMinistry($ministry_id)
+    {
+        $data = $this->service->getByMinistry($ministry_id);
+
+        if ($data->isEmpty()) {
+            return $this->successResponse([], __('messages.empty'));
+        }
+        return $this->successResponse(EmployeeResource::collection($data), __('messages.employees_retrieved'));
+    }
+
 
     public function promoteEmployee(Request $request, $id)
     {

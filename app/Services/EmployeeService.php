@@ -41,6 +41,28 @@ class EmployeeService
         return $employees;
     }
 
+    public function getByBranch($branch_id)
+    {
+        $cacheKey = "employees_in_branch {$branch_id}";
+
+        $employees = Cache::remember($cacheKey, 3600, function () use ($branch_id) {
+            return $this->dao->getByBranch($branch_id);
+        });
+
+        return $employees;
+    }
+
+    public function getByMinistry($ministry_id)
+    {
+        $cacheKey = "employees_in_ministry {$ministry_id}";
+
+        $employees = Cache::remember($cacheKey, 3600, function () use ($ministry_id) {
+            return $this->dao->getByMinistry($ministry_id);
+        });
+
+        return $employees;
+    }
+
     public function readOne($id)
     {
         $cacheKey = "employee {$id}";

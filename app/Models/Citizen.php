@@ -21,4 +21,9 @@ class Citizen extends Model
     {
         return $this->morphOne(Media::class, 'mediable')->where('type', 'img');
     }
+
+    public function replies()
+    {
+        return $this->morphMany(Reply::class, 'sender');
+    }
 }

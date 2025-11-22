@@ -29,13 +29,13 @@ class CitizenController extends Controller
                 404
             );
         }
-        $citizen = $user->citizen()->update([
+        $user->citizen()->update([
             'national_id' => $request->input('national_id'),
             'nationality' => $request->input('nationality'),
         ]);
 
         if ($request->img) {
-            $service->storeImg($request->img, $citizen);
+            $service->storeImg($request->img, $user->citizen);
         }
 
         return $this->successResponse(

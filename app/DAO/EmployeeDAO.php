@@ -40,8 +40,13 @@ class EmployeeDAO
         return $employee;
     }
 
-    public function getEmployeesInBranch($branch_id)
+    public function getByBranch($branch_id)
     {
         return Employee::where('ministry_branch_id', $branch_id)->get();
+    }
+
+    public function getByMinistry($ministry_id)
+    {
+        return Employee::where('ministry_id', $ministry_id)->get();
     }
 }

@@ -37,7 +37,7 @@ class MinistryController extends Controller
         $data = $this->service->read();
 
         if (!$data || $data->isEmpty()) {
-            return $this->errorResponse(__('messages.not_found'), 404);
+            return $this->successResponse([], __('messages.empty'));
         }
 
         return $this->successResponse(MinistryResource::collection($data), __('messages.ministries_retrieved'), 200);

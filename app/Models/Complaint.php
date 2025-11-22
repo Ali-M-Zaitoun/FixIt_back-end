@@ -16,21 +16,14 @@ class Complaint extends Model
         'street_name',
         'citizen_id',
         'ministry_branch_id',
+        'locked_by',
+        'locked_at'
     ];
+
 
     public function media()
     {
         return $this->morphMany(Media::class, 'mediable');
-    }
-
-    public function images()
-    {
-        return $this->media()->where('type', 'img');
-    }
-
-    public function files()
-    {
-        return $this->media()->where('type', 'file');
     }
 
     public function citizen()
@@ -41,5 +34,15 @@ class Complaint extends Model
     public function ministryBranch()
     {
         return $this->belongsTo(MinistryBranch::class);
+    }
+
+    public function lockedEmployee()
+    {
+        return $this->belongsTo(Employee::class, 'locked_by');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Reply::class);
     }
 }

@@ -38,7 +38,7 @@ class MinistryBranchController extends Controller
         $data = $this->service->read();
 
         if (sizeof($data) < 1) {
-            return $this->errorResponse(__('messages.error'));
+            return $this->successResponse([], __('messages.empty'));
         }
 
         return $this->successResponse($data, __('messages.ministries_branches_retrieved'));

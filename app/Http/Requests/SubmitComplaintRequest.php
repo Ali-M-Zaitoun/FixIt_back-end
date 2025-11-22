@@ -22,6 +22,8 @@ class SubmitComplaintRequest extends FormRequest
             'street_name'        => 'nullable|string|max:255',
             'media'              => 'nullable|array',
             'media.*'            => 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:4096',
+            'locked_by'          => 'nullable',
+            'locked_at'          => 'nullable'
         ];
     }
 }

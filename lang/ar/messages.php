@@ -51,4 +51,8 @@ return [
 
     'citizen_updated'               => 'تم تحديث معلومات المواطن بنجاح.',
     'user_not_found'                => 'المستخدم غير موجود.',
+
+    'complaint_resolved'            => 'تم حل الشكوى بنجاح.',
+    'complaint_rejected'            => 'تم رفض الشكوى وتوثيق السبب.',
+    'complaint_status_updated'      => 'تم تحديث حالة الشكوى بنجاح.',
 ];

@@ -54,4 +54,8 @@ return [
 
     'citizen_updated'               => 'Citizen information has been updated successfully.',
     'user_not_found'                => 'User not found.',
+
+    'complaint_resolved'            => 'The complaint has been resolved successfully.',
+    'complaint_rejected'            => 'The complaint has been rejected and the reason has been documented.',
+    'complaint_status_updated'      => 'The complaint status has been updated successfully.'
 ];

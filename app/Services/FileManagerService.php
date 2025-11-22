@@ -35,6 +35,7 @@ class FileManagerService
     {
         $folder = sprintf('citizen/%s', $citizen->id);
         $fileName = $img->getClientOriginalName();
+        $img->storeAs($folder, $fileName, 'public');
         $citizen->image()->create([
             'path' => "$folder/$fileName",
             'type' => "img"
