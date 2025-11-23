@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Services\ComplaintService;
 use App\Traits\ResponseTrait;
 use Closure;
@@ -15,9 +16,11 @@ class CheckEmployeeAccessToComplaint
     public function handle(Request $request, Closure $next): Response
     {
         $complaint = app(ComplaintService::class)->readOne($request->route('id'));
-        $employee = Auth::user()->employee;
+        $user = Auth::user();
+        $employee = $user->employee;
+        $status = $user->hasRole('super_admin') || $employee->canAccessComplaint($complaint);
 
-        if (!$employee->canAccessComplaint($complaint)) {
+        if (!$status) {
             return $this->errorResponse(__('messages.access_denied'), 403);
         }
 

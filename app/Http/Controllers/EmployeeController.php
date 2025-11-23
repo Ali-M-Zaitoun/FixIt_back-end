@@ -28,23 +28,23 @@ class EmployeeController extends Controller
         $this->service = new EmployeeService();
     }
 
-    public function store(AddEmployeeRequest $request, OTPService $otpService)
+    public function store(AddEmployeeRequest $request)
     {
         $data = $request->validated();
 
-        $user = $this->service->store($data, $otpService);
+        $result = $this->service->store($data);
 
-        if (!$user || !$user->employee) {
-            $user ? $user->delete() : null;
-            return $this->errorResponse(
-                [],
-                __('messages.employee_creation_failed'),
-                500
-            );
+        if (!$result['status']) {
+            return $this->errorResponse(__('messages.ministry_branch_mismatch'), 400);
+        }
+
+        if (!$result['user'] || !$result['user']->employee) {
+            $result['user']?->delete();
+            return $this->errorResponse(__('messages.employee_creation_failed'), 500);
         }
 
         return $this->successResponse(
-            ['employee' => new EmployeeResource($user->employee)],
+            ['employee' => new EmployeeResource($result['user']->employee)],
             __('messages.employee_stored'),
             201
         );

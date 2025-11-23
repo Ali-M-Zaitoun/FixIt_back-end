@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DAO\EmployeeDAO;
 use App\Http\Requests\BaseUserRequest;
 use App\Http\Resources\EmployeeResource;
+use App\Models\MinistryBranch;
 use App\Models\User;
 use App\Models\UserOTP;
 use Illuminate\Support\Arr;
@@ -20,15 +21,31 @@ class EmployeeService
         $this->dao = new EmployeeDAO();
     }
 
-    public function store($data, OTPService $otpService)
+    public function store($data)
     {
         $dataUser = Arr::only($data, ['first_name', 'last_name', 'email', 'phone', 'role', 'address']);
         $dataUser['password'] = bcrypt($dataUser['first_name'] . '12345');
 
+        $ministryId = $data['ministry_id'] ?? null;
+        $branchId   = $data['ministry_branch_id'] ?? null;
+
+        if ($branchId) {
+            $branch = app(MinistryBranchService::class)->readOne($branchId);
+            if ($branch->ministry_id != $ministryId) {
+                return [
+                    'status' => false,
+                ];
+            }
+        }
+
         $user = $this->dao->store($data, $dataUser);
         $user->syncRoles($data['role']);
-        $otpService->resendOTP($user->id);
-        return $user;
+
+        app(OTPService::class)->resendOTP($user->id);
+        return [
+            'status' => true,
+            'user' => $user
+        ];
     }
 
     public function read()

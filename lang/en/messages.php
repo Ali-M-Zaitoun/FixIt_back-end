@@ -31,6 +31,7 @@ return [
     'ministry_branches_retrieved'   => 'Ministry\'s branches data retrieved successfully.',
     'ministry_not_found'            => 'Ministry not found.',
     'governorates_retrieved'        => 'Governorates retrieved successfully.',
+    'ministry_branch_mismatch'       => 'The selected branch does not belong to the chosen ministry.',
 
     'ministry_manager_assigned_success' => 'The employee has been successfully assigned as the ministry manager.',
     'ministry_manager_assignment_failed' => 'This employee cannot be assigned because they do not belong to this ministry.',
@@ -43,8 +44,9 @@ return [
     'employee_retrieved'            => 'Employee data retrieved successfully.',
     'employees_retrieved'           => 'Employees data retrieved successfully.',
     'employee_promoted'             => 'Employee has been promoted successfully.',
+    'employee_not_found'            => 'Employee not found.',
     'unauthorized_promotion'        => 'You are not authorized to promote to the specified position.',
-
+    'branch_mismatch'               => 'You cannot process this complaint because it belongs to another branch.',
 
     'token_refreshed'               => 'Token has been refreshed successfully.',
     'invalid_refresh_token'         => 'Invalid refresh token.',

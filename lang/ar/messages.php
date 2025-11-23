@@ -30,6 +30,7 @@ return [
     'ministry_branches_retrieved'   => 'تم استرجاع بيانات فروع الوزارة بنجاح.',
     'ministry_not_found'            => 'الوزارة غير موجودة.',
     'governorates_retrieved'        => 'تم استرجاع المحافظات بنجاح.',
+    'ministry_branch_mismatch'        => 'الفرع المحدد لا يتبع للوزارة المختارة.',
 
     'ministry_manager_assigned_success'  => 'تم تعيين الموظف كمسؤول عن الوزارة بنجاح.',
     'ministry_manager_assignment_failed' => 'لا يمكن تعيين هذا الموظف لأنه لا يتبع هذه الوزارة.',
@@ -41,7 +42,9 @@ return [
     'employee_retrieved'            => 'تم استرجاع بيانات الموظف بنجاح.',
     'employees_retrieved'           => 'تم استرجاع بيانات الموظفين بنجاح.',
     'employee_promoted'             => 'تم ترقية الموظف بنجاح.',
+    'employee_not_found'            => 'الموظف غير موجود.',
     'unauthorized_promotion'        => 'ليس لديك صلاحية لترقية إلى المنصب المحدد.',
+    'branch_mismatch'               => 'لا يمكنك معالجة هذه الشكوى لأنها تتبع لفرعٍ آخر.',
 
     'token_refreshed'               => 'تم تحديث الرمز بنجاح.',
     'invalid_refresh_token'         => 'رمز التحديث غير صالح.',

@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+use function PHPUnit\Framework\isEmpty;
+
 class ComplaintController extends Controller
 {
     use ResponseTrait;
@@ -123,7 +125,7 @@ class ComplaintController extends Controller
         if ($result)
             return $this->successResponse([], __('messages.complaint_status_updated'));
 
-        return $this->errorResponse(__('messages.error'));
+        return $this->errorResponse(__('messages.complaint_locked_by_other'));
     }
 
     public function addReply($id, Request $request)
@@ -138,8 +140,10 @@ class ComplaintController extends Controller
     public function startProcessing($id, $emp_id)
     {
         $result = $this->service->startProcessing($id, $emp_id);
-        if (!$result)
-            return $this->errorResponse(__('messages.complaint_locked_by_other'));
+
+        if (!$result['status']) {
+            return $this->errorResponse(__("messages.{$result['reason']}"), 401);
+        }
 
         return $this->successResponse([], __('messages.complaint_started_processing'));
     }

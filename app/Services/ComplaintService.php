@@ -133,25 +133,53 @@ class ComplaintService
 
     public function updateStatus($id, $status, $reason = "", $user_id)
     {
+        $complaint = $this->dao->readOne($id);
+        $employee = Employee::where('user_id', $user_id)->first();
+        $lockExpired = $complaint->locked_at <= now()->subMinutes(15);
+        $lockedByOther = $complaint->locked_by && $complaint->locked_by != $employee->id;
+
+        if ($lockedByOther && !$lockExpired) {
+            return false;
+        }
+
         $complaint = $this->dao->updateStatus($id, $status);
 
         $message = $status === 'resolved'
             ? __('messages.complaint_resolved')
             : __('messages.complaint_rejected') . $reason;
 
-        $this->dao->addReply($complaint->id, Employee::where('user_id', $user_id)->first(), $message);
+        $this->dao->addReply($complaint->id, $employee, $message);
         return true;
     }
 
     public function startProcessing($id, $emp_id)
     {
         $complaint = $this->dao->readOne($id);
-        if (
-            $complaint->locked_by &&
-            $complaint->locked_by != $emp_id &&
-            $complaint->locked_at > now()->subMinutes(15)
-        ) {
-            return false;
+        $employee = app(EmployeeService::class)->readOne($emp_id);
+        if (!$employee) {
+            return [
+                'status' => false,
+                'reason' => 'employee_not_found'
+            ];
+        }
+
+        $lockExpired = $complaint->locked_at <= now()->subMinutes(15);
+        $lockedByOther = $complaint->locked_by && $complaint->locked_by != $emp_id;
+        $sameBranch = $complaint->ministry_branch_id === $employee->ministry_branch_id;
+
+
+        if (!$sameBranch) {
+            return [
+                'status' => false,
+                'reason' => 'branch_mismatch'
+            ];
+        }
+
+        if ($lockedByOther && !$lockExpired) {
+            return [
+                'status' => false,
+                'reason' => 'complaint_locked_by_other'
+            ];
         }
 
         $this->dao->lock($complaint, $emp_id);
@@ -159,7 +187,7 @@ class ComplaintService
         if ($complaint->status !== 'in_progress')
             $complaint->update(['status' => 'in_progress']);
 
-        return true;
+        return ['status' => true];
     }
 
     public function addReply($id, $data)
