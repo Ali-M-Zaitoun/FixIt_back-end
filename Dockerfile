@@ -1,63 +1,23 @@
-# --- STAGE 1: BUILD ENVIRONMENT ---
-FROM php:8.2-fpm-alpine as base
+FROM php:8.3-apache
 
-# 1. Install necessary system packages for PHP extensions and tools
-RUN apk update && apk add \
-    nginx \
-    supervisor \
-    openssl \
-    git \
-    curl \
-    postgresql-client \
-    zip \
-    unzip \
-    icu-dev \
-    libpq \
-    && rm -rf /var/cache/apk/*
+# Install required extensions
+RUN docker-php-ext-install pdo pdo_mysql
 
-# 2. Install required PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql intl opcache
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
 
-# 3. Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Copy project files
+COPY . /var/www/html
 
-# Set working directory for the application
-WORKDIR /app
+# Set working directory
+WORKDIR /var/www/html
 
-# 4. Copy application source code
-COPY . /app
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 5. Install PHP dependencies using Composer
-# We do this here so we can remove the composer cache later
-RUN composer install --no-dev --optimize-autoloader
+# Apache configuration
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+COPY ./apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 
-# 6. Generate the Application Key
-# This must be run before caching config
-# Render will overwrite this value with the ENV variable at runtime.
-RUN php artisan key:generate
-
-# 7. Cache configuration and routes for production
-RUN php artisan config:cache
-RUN php artisan route:cache
-
-# 8. Set correct permissions for storage and bootstrap/cache
-RUN chown -R www-data:www-data /app \
-    && chmod -R 775 /app/storage \
-    && chmod -R 775 /app/bootstrap/cache
-
-# --- STAGE 2: PRODUCTION RUNTIME ---
-FROM base
-
-# Copy Nginx config and deploy script
-COPY conf/nginx-site.conf /etc/nginx/conf.d/default.conf
-COPY scripts/00-laravel-deploy.sh /usr/local/bin/00-laravel-deploy.sh
-
-# Make the deploy script executable
-RUN chmod +x /usr/local/bin/00-laravel-deploy.sh
-
-# Expose ports
-EXPOSE 8080
-
-# Define the command that runs when the container starts
-# We use supervisord to manage both Nginx and PHP-FPM processes
-CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Expose port
+EXPOSE 80
