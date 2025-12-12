@@ -1,23 +1,26 @@
 FROM php:8.3-apache
 
-# Install required extensions
+# Install extensions
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Enable Apache mod_rewrite
+# Enable rewrite
 RUN a2enmod rewrite
 
-# Copy project files
+# Copy files
 COPY . /var/www/html
-
-# Set working directory
 WORKDIR /var/www/html
 
+# Install dependencies
+RUN apt-get update && apt-get install -y unzip
+RUN curl -sS https://getcomposer.org/installer | php
+RUN php composer.phar install --no-dev --optimize-autoloader
+
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache
 
-# Apache configuration
+# Configure Apache
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
-COPY ./apache/000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY conf/000-default.conf /etc/apache2/sites-available/000-default.conf
 
-# Expose port
 EXPOSE 80
