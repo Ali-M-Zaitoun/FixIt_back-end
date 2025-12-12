@@ -1,12 +1,7 @@
-# Git files
 .git
 .gitignore
-
-# Node modules (large & unnecessary in container)
 node_modules
 npm-debug.log
-
-# Laravel logs and cache (can be regenerated)
 storage/logs/*.log
 storage/framework/cache/*.*
 storage/framework/sessions/*.*
