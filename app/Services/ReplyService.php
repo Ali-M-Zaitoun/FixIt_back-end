@@ -25,7 +25,7 @@ class ReplyService
     public function addReply($id, $sender, $data)
     {
         $complaint = $this->complaintDAO->readOne($id);
-        if ($data['media']) {
+        if (isset($data['media'])) {
             $media = $data['media'];
             $datePath = $complaint->created_at->format('Y/m/d');
             $ministryAbbr = $complaint->ministry->abbreviation ?? 'unknown';

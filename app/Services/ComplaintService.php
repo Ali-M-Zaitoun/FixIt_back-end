@@ -169,10 +169,10 @@ class ComplaintService
 
         $user = $complaint->citizen->user;
         foreach ($user->fcmTokens as $token) {
-            $this->firebase->sendToToken($token, "Status of complaint has been changed", $message);
+            $this->firebase->sendToToken($token->token, __('messages.complaint_status_changed'), $message);
         }
-
-        $this->replyService->addReply($complaint->id, $employee, $message);
+        $data['content'] = $message;
+        $this->replyService->addReply($complaint->id, $employee, $data);
         return true;
     }
 
