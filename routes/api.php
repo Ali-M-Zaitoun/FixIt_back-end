@@ -24,8 +24,9 @@ Route::controller(UserController::class)->group(function () {
 
 Route::post('/fcm-token', [FcmTokenController::class, 'store'])
     ->middleware('auth:sanctum');
-
 Route::post('testNotification', [FcmTokenController::class, 'testNotification'])->middleware('auth:sanctum');
+Route::get('my_tokens', [FcmTokenController::class, 'my_tokens'])->middleware('auth:sanctum');
+
 
 
 Route::post('verify-otp', [UserOTPController::class, 'verifyOtp']);
@@ -42,7 +43,7 @@ Route::prefix('complaint')
         Route::get('/{complaint_id}', 'readOne')->middleware(['permission:complaint.process', 'check.access']);
 
         Route::post('startProcessing/{complaint_id}', 'startProcessing')->middleware(['permission:complaint.process', 'check.access']);
-        Route::post('updateStatus/{id}', 'updateStatus')->middleware(['permission:complaint.process', 'check.employee.access']);
+        Route::post('updateStatus/{complaint_id}', 'updateStatus')->middleware(['permission:complaint.process', 'check.access']);
         Route::delete('delete/{complaint_id}', 'delete')->middleware('check.access');
     });
 

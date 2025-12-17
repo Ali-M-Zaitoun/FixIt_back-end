@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Services\FirebaseNotificationService;
+use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class FcmTokenController extends Controller
 {
+    use ResponseTrait;
     public function store(Request $request)
     {
         $request->validate([
@@ -20,14 +22,21 @@ class FcmTokenController extends Controller
             ['device_type' => $request->device_type]
         );
 
-        return response()->json(['status' => 'ok']);
+        return $this->successResponse([], __('messages.success'), 201);
     }
 
-    public function testNotification(FirebaseNotificationService $firebase) {
+    public function testNotification(FirebaseNotificationService $firebase)
+    {
         $user = Auth::user();
         foreach ($user->fcmTokens as $token) {
-            $firebase->sendToToken($token, "Test", "Hi, This is test\n We'll do it. :)");
+            $firebase->sendToToken($token->token, "Come on", "I think you see the notification now :)");
         }
         return "Sent Notification";
+    }
+
+    public function my_tokens()
+    {
+        $user = Auth::user();
+        return $user->fcmTokens;
     }
 }

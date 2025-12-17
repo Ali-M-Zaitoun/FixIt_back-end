@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Kreait\Firebase\Messaging;
+use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 
