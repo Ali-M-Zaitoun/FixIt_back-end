@@ -25,6 +25,8 @@ Route::controller(UserController::class)->group(function () {
 Route::post('/fcm-token', [FcmTokenController::class, 'store'])
     ->middleware('auth:sanctum');
 
+Route::post('testNotification', [FcmTokenController::class, 'testNotification'])->middleware('auth:sanctum');
+
 
 Route::post('verify-otp', [UserOTPController::class, 'verifyOtp']);
 Route::post('resend-otp', [UserOTPController::class, 'resendOtp']);
