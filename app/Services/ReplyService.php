@@ -25,6 +25,7 @@ class ReplyService
     public function addReply($id, $sender, $data)
     {
         $complaint = $this->complaintDAO->readOne($id);
+        $reply = $this->replyDAO->addReply($id, $sender, $data['content']);
         if (isset($data['media'])) {
             $media = $data['media'];
             $datePath = $complaint->created_at->format('Y/m/d');
@@ -38,8 +39,6 @@ class ReplyService
                 $governorateCode,
                 $ref
             );
-
-            $reply = $this->replyDAO->addReply($id, $sender, $data['content']);
             $this->fileService->storeFile(
                 $reply,
                 $media,
@@ -48,8 +47,8 @@ class ReplyService
                 typeResolver: fn($file) => $this->fileService->detectFileType($file)
             );
             $this->cacheManager->clearComplaintCache(single: $complaint->id);
-            return $reply;
         }
+        return $reply;
     }
 
     public function readReplies($id)

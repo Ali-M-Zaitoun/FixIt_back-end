@@ -38,12 +38,12 @@ Route::prefix('complaint')
 
         Route::post('submit', 'submit');
         Route::get('my', 'getMyComplaints');
-        Route::get('/', 'read')->middleware(['permission:complaint.read', 'check.access']);
+        Route::get('/', 'read')->middleware(['permission:complaint.read']);
         Route::get('/{complaint_id}', 'readOne')->middleware(['permission:complaint.process', 'check.access']);
 
         Route::post('startProcessing/{complaint_id}', 'startProcessing')->middleware(['permission:complaint.process', 'check.access']);
         Route::post('updateStatus/{id}', 'updateStatus')->middleware(['permission:complaint.process', 'check.employee.access']);
-        Route::delete('delete/{id}', 'delete')->middleware('check.access');
+        Route::delete('delete/{complaint_id}', 'delete')->middleware('check.access');
     });
 
 Route::prefix('complaint/reply')
