@@ -66,8 +66,10 @@ return [
 
     'complaint_resolved'            => 'تم حل الشكوى بنجاح.',
     'complaint_rejected'            => 'تم رفض الشكوى وتوثيق السبب.',
+    'complaint_status_changed'      => 'تم تغيير حالة الشكوى الخاصة بك.',
     'complaint_status_updated'      => 'تم تحديث حالة الشكوى بنجاح.',
 
+    'reply_received'                => 'تمت إضافة رد على شكواك.',
     'reply_sent'                    => 'تم إرسال الرد بنجاح.',
     'reply_failed'                  => 'فشل في إرسال الرد، حاول مرة أخرى.',
     'replies_retrieved'             => 'تم استرجاع الردود الخاصة بالشكوى بنجاح.',

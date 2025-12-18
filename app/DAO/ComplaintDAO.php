@@ -59,9 +59,8 @@ class ComplaintDAO
         return $complaint;
     }
 
-    public function updateStatus($id, $status)
+    public function updateStatus($complaint, $status)
     {
-        $complaint = $this->readOne($id);
         $complaint->update(['status' => $status]);
         return $complaint;
     }

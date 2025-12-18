@@ -1,13 +1,13 @@
 <?php
 
+use App\Exceptions\AccessDeniedException;
 use App\Http\Middleware\CheckAccessToComplaint;
-use App\Http\Middleware\CheckEmployeeAccessToComplaint;
 use App\Http\Middleware\CheckUserActive;
 use App\Http\Middleware\SetLocaleFromHeader;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Http\Middleware\HandleCors;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -30,7 +30,17 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (
+            AccessDeniedException $e,
+        ) {
+            if ($e->getStatusCode() === 403) {
+                return response()->json([
+                    'status'  => __('messages.error'),
+                    'message' => __('messages.unauthorized'),
+                    'errors'  => []
+                ], 403);
+            }
+        });
     })
     ->withEvents(discover: [
         __DIR__ . '/../app/Listeners',

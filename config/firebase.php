@@ -50,12 +50,8 @@ return [
              *
              */
 
-            'projects' => [
-                'app' => [
-                    'credentials' => [
-                        'file' => 'app/firebase/firebase-service-account.json',
-                    ],
-                ],
+            'credentials' => [
+                'file' => storage_path('app/firebase/firebase-service-account.json'),
             ],
 
 

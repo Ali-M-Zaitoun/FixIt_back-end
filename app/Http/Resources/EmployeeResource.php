@@ -11,10 +11,11 @@ class EmployeeResource extends JsonResource
     {
         $locale = app()->getLocale();
         return [
-            'id'                 => $this->id,
+            'employee_id'        => $this->id,
             'start_date'         => $this->start_date,
             'end_date'           => $this->end_date ? $this->end_date : null,
             'ministry'           => [
+                'id'             => $this->ministry->id,
                 'name'           => $this->ministry->translation($locale)->name,
                 'abbreviation'   => $this->ministry->abbreviation,
             ],

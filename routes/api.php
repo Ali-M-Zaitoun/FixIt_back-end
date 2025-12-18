@@ -28,7 +28,6 @@ Route::post('testNotification', [FcmTokenController::class, 'testNotification'])
 Route::get('my_tokens', [FcmTokenController::class, 'my_tokens'])->middleware('auth:sanctum');
 
 
-
 Route::post('verify-otp', [UserOTPController::class, 'verifyOtp']);
 Route::post('resend-otp', [UserOTPController::class, 'resendOtp']);
 
@@ -40,20 +39,20 @@ Route::prefix('complaint')
         Route::post('submit', 'submit');
         Route::get('my', 'getMyComplaints');
         Route::get('/', 'read')->middleware(['permission:complaint.read']);
-        Route::get('/{complaint_id}', 'readOne')->middleware(['permission:complaint.process', 'check.access']);
+        Route::get('/{complaint}', 'readOne')->middleware(['permission:complaint.process']);
 
-        Route::post('startProcessing/{complaint_id}', 'startProcessing')->middleware(['permission:complaint.process', 'check.access']);
-        Route::post('updateStatus/{complaint_id}', 'updateStatus')->middleware(['permission:complaint.process', 'check.access']);
-        Route::delete('delete/{complaint_id}', 'delete')->middleware('check.access');
+        Route::post('startProcessing/{complaint}', 'startProcessing')->middleware(['permission:complaint.process']);
+        Route::post('updateStatus/{complaint}', 'updateStatus')->middleware(['permission:complaint.process']);
+        Route::delete('delete/{complaint}', 'delete');
     });
 
 Route::prefix('complaint/reply')
-    ->middleware(['auth:sanctum', 'active.user', 'check.access'])
+    ->middleware(['auth:sanctum', 'active.user'])
     ->controller(ReplyController::class)
     ->group(function () {
-        Route::post('add/{complaint_id}', 'addReply');
-        Route::get('read/{complaint_id}', 'read');
-        Route::delete('delete/{reply_id}', 'delete');
+        Route::post('add/{complaint}', 'addReply');
+        Route::get('read/{complaint}', 'read');
+        Route::delete('delete/{reply}', 'delete');
     });
 
 Route::get('get-governorates', [MinistryController::class, 'getGovernorates'])->middleware(['auth:sanctum', 'active.user']);

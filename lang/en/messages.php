@@ -68,8 +68,10 @@ return [
 
     'complaint_resolved'            => 'The complaint has been resolved successfully.',
     'complaint_rejected'            => 'The complaint has been rejected and the reason has been documented.',
+    'complaint_status_changed'      => 'Your complaint status has changed.',
     'complaint_status_updated'      => 'The complaint status has been updated successfully.',
 
+    'reply_recieved'                => 'New reply to your complaint.',
     'reply_sent'                    => 'Reply sent successfully.',
     'reply_failed'                  => 'Failed to send reply, please try again.',
     'replies_retrieved'             => 'Replies data retrieved successfully',
