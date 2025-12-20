@@ -5,6 +5,8 @@ namespace App\Services;
 use App\DAO\ComplaintDAO;
 use App\DAO\ReplyDAO;
 use App\Events\NotificationRequested;
+use App\Models\Citizen;
+use App\Models\Employee;
 use App\Models\Reply;
 use Illuminate\Support\Facades\DB;
 
@@ -31,7 +33,9 @@ class ReplyService
             if (!empty($data['media'])) {
                 $this->storeReplyMedia($complaint, $reply, $data['media']);
             }
-            event(new NotificationRequested($sender->user, __('messages.reply_received'), $data['content']));
+            if ($sender instanceof Employee) {
+                event(new NotificationRequested($complaint->citizen->user, __('messages.reply_received'), $data['content']));
+            }
             return $reply;
         });
     }

@@ -52,6 +52,7 @@ return [
     'token_refreshed'               => 'تم تحديث الرمز بنجاح.',
     'invalid_refresh_token'         => 'رمز التحديث غير صالح.',
 
+    'complaint_received'            => 'تم استلام شكوى جديدة.',
     'complaint_submitted'           => 'تم تقديم الشكوى بنجاح.',
     'complaints_retrieved'          => 'تم استرجاع بيانات الشكاوى بنجاح.',
     'complaint_not_found'           => 'الشكوى غير موجودة.',

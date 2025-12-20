@@ -6,6 +6,8 @@ use App\Exceptions\AccessDeniedException;
 use App\Models\Complaint;
 use App\Models\User;
 
+use function PHPUnit\Framework\isEmpty;
+
 class ComplaintPolicy
 {
     public function viewByBranch(User $user, $branchId)
@@ -52,6 +54,24 @@ class ComplaintPolicy
                 return true;
             }
         }
+        throw new AccessDeniedException();
+    }
+
+    public function addReply(User $user, Complaint $complaint)
+    {
+        if ($user->citizen && !isEmpty($complaint->replies))
+            return true;
+
+        if ($user->employee) {
+            $lockExpired = $complaint->locked_at <= now()->subMinutes(15);
+            $lockedByOther = $complaint->locked_by && $complaint->locked_by != $user->employee->id;
+            if ($lockExpired)
+                return true;
+
+            if (!$lockExpired && !$lockedByOther)
+                return true;
+        }
+
         throw new AccessDeniedException();
     }
 }

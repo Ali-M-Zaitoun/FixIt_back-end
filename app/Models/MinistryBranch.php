@@ -22,6 +22,11 @@ class MinistryBranch extends Model
         return $this->belongsTo(Employee::class, 'manager_id');
     }
 
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
+
     public function translations()
     {
         return $this->hasMany(MinistryBranchTranslation::class);

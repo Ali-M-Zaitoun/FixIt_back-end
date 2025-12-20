@@ -100,7 +100,7 @@ class ComplaintController extends Controller
 
         $this->authorize('view', $complaint);
 
-        $this->service->updateStatus($complaint, $request->status, $request->reason, Auth::user()->employee);
+        $this->service->updateStatus($complaint, $request->status, $request->input('reason'), Auth::user()->employee);
         return $this->successResponse([], __('messages.complaint_status_updated'));
     }
 

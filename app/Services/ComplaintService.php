@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 
 class ComplaintService
 {
-    protected $complaintDAO, $fileService, $cacheManager, $ministryBranchService, $replyService, $employeeService, $firebase, $ministryService;
+    protected $complaintDAO, $fileService, $cacheManager, $ministryBranchService, $replyService, $employeeService, $firebase, $ministryService, $governorateDAO;
 
     public function __construct(
         ComplaintDAO $complaintDAO,
@@ -30,7 +30,8 @@ class ComplaintService
         ReplyService $replyService,
         EmployeeService $employeeService,
         FirebaseNotificationService $firebase,
-        MinistryService $ministryService
+        MinistryService $ministryService,
+        GovernorateDAO $governorateDAO
     ) {
         $this->complaintDAO = $complaintDAO;
         $this->fileService = $fileService;
@@ -40,18 +41,29 @@ class ComplaintService
         $this->replyService = $replyService;
         $this->employeeService = $employeeService;
         $this->firebase = $firebase;
+        $this->governorateDAO = $governorateDAO;
     }
 
     public function submitComplaint(array $data)
     {
-        return DB::transaction(function () use ($data) {
+        $complaint = null;
+        $employees = [];
+        DB::transaction(function () use ($data, &$complaint, &$employees) {
             $media = $data['media'] ?? null;
             unset($data['media'], $data['locked_by'], $data['locked_at']);
 
-            $ministryBranch = $this->ministryBranchService->readOne($data['ministry_branch_id']);
-            $ministryAbbr = $ministryBranch->ministry->abbreviation;
+            $ministryAbbr = null;
+            if (!empty($data['ministry_branch_id'])) {
+                $ministryBranch = $this->ministryBranchService->readOne($data['ministry_branch_id']);
+                $employees = $ministryBranch->employees;
+                $ministryAbbr = $ministryBranch->ministry->abbreviation;
+            } else {
+                $ministry = $this->ministryService->readOne($data['ministry_id']);
+                $employees = collect([$ministry->manager]);
+                $ministryAbbr = $ministry->abbreviation;
+            }
 
-            $governorateCode = app(GovernorateDAO::class)->readOne($data['governorate_id'])->code;
+            $governorateCode = $this->governorateDAO->readOne($data['governorate_id'])->code;
 
             $data['reference_number'] = sprintf(
                 '%s_%s_%s',
@@ -65,9 +77,17 @@ class ComplaintService
             $this->cacheManager->clearComplaintCache($data['citizen_id']);
 
             $this->storeComplaintMedia($complaint, $ministryAbbr, $governorateCode, $data['reference_number'], $media);
-
-            return $complaint;
         });
+        DB::afterCommit(function () use ($employees, $data) {
+            foreach ($employees as $employee) {
+                event(new NotificationRequested(
+                    $employee->user,
+                    __('messages.complaint_received'),
+                    $data['type']
+                ));
+            }
+        });
+        return $complaint;
     }
 
     # Helper function
@@ -156,7 +176,7 @@ class ComplaintService
 
         event(new NotificationRequested($complaint->citizen->user, __('messages.complaint_status_changed'), $message));
 
-        $this->replyService->addReply($complaint->id, $employee, ['content' => $message]);
+        $this->replyService->addReply($complaint, $employee, ['content' => $message]);
     }
 
     public function startProcessing(Complaint $complaint, Employee $employee): void

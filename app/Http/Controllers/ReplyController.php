@@ -11,6 +11,8 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use function PHPUnit\Framework\isEmpty;
+
 class ReplyController extends Controller
 {
     use ResponseTrait, AuthorizesRequests;
@@ -25,6 +27,7 @@ class ReplyController extends Controller
     {
         $this->authorize('view', $complaint);
         $user = Auth::user();
+        $this->authorize('addReply', $complaint);
         $sender = $user->citizen ?? $user->employee;
 
         $request->validate([
@@ -46,7 +49,9 @@ class ReplyController extends Controller
 
         $result = $this->replyService->readReplies($complaint);
 
-        return $this->successResponse(ReplyResource::collection($result), __('messages.replies_retrieved'));
+        if (!isEmpty($result))
+            return $this->successResponse(ReplyResource::collection($result), __('messages.replies_retrieved'));
+        return $this->successResponse([], __('messages.empty'));
     }
 
     public function delete(Reply $reply)

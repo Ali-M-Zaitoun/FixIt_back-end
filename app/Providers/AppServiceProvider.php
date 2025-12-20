@@ -9,6 +9,7 @@ use App\Policies\ReplyPolicy;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,5 +28,9 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Complaint::class, ComplaintPolicy::class);
         Gate::policy(Reply::class, ReplyPolicy::class);
+
+        if ($this->app->environment('production')) {
+            URL::forceHttps('https');
+        }
     }
 }

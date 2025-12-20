@@ -54,6 +54,7 @@ return [
     'token_refreshed'               => 'Token has been refreshed successfully.',
     'invalid_refresh_token'         => 'Invalid refresh token.',
 
+    'complaint_received'            => 'A new complaint has been formally received.',
     'complaint_submitted'           => 'Complaint submitted successfully.',
     'complaints_retrieved'          => 'Complaints data retrieved successfully.',
     'complaint_not_found'           => 'Complaint not found.',
