@@ -5,11 +5,14 @@ namespace App\Services;
 use App\DAO\ComplaintDAO;
 use App\DAO\GovernorateDAO;
 use App\DAO\UserDAO;
+use App\DTO\ComplaintContext;
 use App\Events\ComplaintCreated;
 use App\Events\NotificationRequested;
+use App\Exceptions\AccessDeniedException;
 use App\Exceptions\BranchMismatchException;
 use App\Exceptions\ComplaintAlreadyLockedException;
 use App\Exceptions\ComplaintLockedByOtherException;
+use App\Exceptions\MinistryRequiresBranchException;
 use App\Models\Complaint;;
 
 use App\Models\Employee;
@@ -18,9 +21,11 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+use function PHPUnit\Framework\isEmpty;
+
 class ComplaintService
 {
-    protected $complaintDAO, $fileService, $cacheManager, $ministryBranchService, $replyService, $employeeService, $firebase, $ministryService, $governorateDAO;
+    protected $complaintDAO, $fileService, $cacheManager, $ministryBranchService, $replyService, $employeeService, $firebase, $ministryService, $governorateDAO, $notificationSerivce;
 
     public function __construct(
         ComplaintDAO $complaintDAO,
@@ -31,7 +36,8 @@ class ComplaintService
         EmployeeService $employeeService,
         FirebaseNotificationService $firebase,
         MinistryService $ministryService,
-        GovernorateDAO $governorateDAO
+        GovernorateDAO $governorateDAO,
+        NotificationService $notificationSerivce
     ) {
         $this->complaintDAO = $complaintDAO;
         $this->fileService = $fileService;
@@ -42,55 +48,80 @@ class ComplaintService
         $this->employeeService = $employeeService;
         $this->firebase = $firebase;
         $this->governorateDAO = $governorateDAO;
+        $this->notificationSerivce = $notificationSerivce;
     }
 
     public function submitComplaint(array $data)
     {
-        $complaint = null;
-        $employees = [];
-        DB::transaction(function () use ($data, &$complaint, &$employees) {
+        return DB::transaction(function () use ($data) {
             $media = $data['media'] ?? null;
-            unset($data['media'], $data['locked_by'], $data['locked_at']);
+            unset($data['media']);
 
-            $ministryAbbr = null;
-            if (!empty($data['ministry_branch_id'])) {
-                $ministryBranch = $this->ministryBranchService->readOne($data['ministry_branch_id']);
-                $employees = $ministryBranch->employees;
-                $ministryAbbr = $ministryBranch->ministry->abbreviation;
-            } else {
-                $ministry = $this->ministryService->readOne($data['ministry_id']);
-                $employees = collect([$ministry->manager]);
-                $ministryAbbr = $ministry->abbreviation;
-            }
-
-            $governorateCode = $this->governorateDAO->readOne($data['governorate_id'])->code;
-
-            $data['reference_number'] = sprintf(
-                '%s_%s_%s',
-                $ministryAbbr,
-                $governorateCode,
-                Str::random(8)
-            );
+            $context = $this->contextResolver($data);
+            $data['governorate_id'] = $context->governorateId;
+            $data['reference_number'] = $this->generateRefNum($context->ministryAbbr, $context->governorateCode);
 
             $complaint = $this->complaintDAO->submit($data);
 
             $this->cacheManager->clearComplaintCache($data['citizen_id']);
 
-            $this->storeComplaintMedia($complaint, $ministryAbbr, $governorateCode, $data['reference_number'], $media);
+            $this->storeComplaintMedia($complaint, $context->ministryAbbr, $context->governorateCode, $data['reference_number'], $media);
+
+            DB::afterCommit(
+                fn() =>
+                $this->notificationSerivce->notifyEmployees($context->employees, $data['type'])
+            );
+
+            return $complaint;
         });
-        DB::afterCommit(function () use ($employees, $data) {
-            foreach ($employees as $employee) {
-                event(new NotificationRequested(
-                    $employee->user,
-                    __('messages.complaint_received'),
-                    $data['type']
-                ));
-            }
-        });
-        return $complaint;
     }
 
-    # Helper function
+    private function contextResolver(array $data): ComplaintContext
+    {
+        if (!empty($data['ministry_branch_id'])) {
+            return $this->resolveFromBranch($data);
+        }
+        return $this->resolveFromMinistry($data['ministry_id']);
+    }
+
+    private function resolveFromBranch(array $data): ComplaintContext
+    {
+        $branch = $this->ministryBranchService->readOne($data['ministry_branch_id']);
+        if ($branch->ministry_id != $data['ministry_id'])
+            throw new BranchMismatchException();
+
+        return new ComplaintContext(
+            ministryAbbr: $branch->ministry->abbreviation,
+            governorateCode: $branch->governorate->code,
+            governorateId: $branch->governorate->id,
+            employees: $branch->employees
+        );
+    }
+
+    private function resolveFromMinistry($ministryId): ComplaintContext
+    {
+        $ministry = $this->ministryService->readOne($ministryId);
+        if (isEmpty($ministry->branches))
+            throw new MinistryRequiresBranchException();
+        return new ComplaintContext(
+            ministryAbbr: $ministry->abbreviation,
+            governorateCode: null,
+            governorateId: null,
+            employees: collect([$ministry->manager])
+        );
+    }
+
+    private function generateRefNum($ministryAbbr, $governorateCode): string
+    {
+        return $data['reference_number'] = sprintf(
+            '%s_%s_%s',
+            $ministryAbbr,
+            $governorateCode,
+            Str::random(8)
+        );
+    }
+
+    # Helper functions
     private function storeComplaintMedia($complaint, $ministryAbbr, $governorateCode, $ref_number, $media): void
     {
 
@@ -111,6 +142,18 @@ class ComplaintService
         );
         $this->cacheManager->clearComplaintCache(single: $complaint->id);
     }
+
+    private function generate(string $ministryAbbr, ?string $govCode): string
+    {
+        return sprintf(
+            '%s_%s_%s',
+            $ministryAbbr,
+            $govCode ?? 'NA',
+            Str::random(8)
+        );
+    }
+
+    private function dataResolver(array $data) {}
 
     public function getMyComplaints($citizen_id)
     {

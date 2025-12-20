@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('status', ['new', 'in_progress', 'resolved', 'rejected'])->default('new');
             $table->foreignId('ministry_id')->constrained();
             $table->foreignId('ministry_branch_id')->nullable()->constrained();
-            $table->foreignId('governorate_id')->constrained();
+            $table->foreignId('governorate_id')->nullable()->constrained();
             $table->string('city_name')->nullable();
             $table->string('street_name')->nullable();
             $table->foreignId('locked_by')->nullable()->constrained('employees');

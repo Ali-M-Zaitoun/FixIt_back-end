@@ -34,6 +34,8 @@ return [
     'ministry_not_found'            => 'الوزارة غير موجودة.',
     'governorates_retrieved'        => 'تم استرجاع المحافظات بنجاح.',
     'ministry_branch_mismatch'      => 'الفرع المحدد لا يتبع للوزارة المختارة.',
+    'ministry_requires_branch'      => 'هذه الوزارة لديها أفرع، يرجى اختيار الفرع المناسب لتقديم الشكوى.',
+
 
     'ministry_manager_assigned_success'  => 'تم تعيين الموظف كمسؤول عن الوزارة بنجاح.',
     'ministry_manager_assignment_failed' => 'لا يمكن تعيين هذا الموظف لأنه لا يتبع هذه الوزارة.',

@@ -25,7 +25,6 @@ return [
     'invalid_or_expired_otp'        => 'Invalid or expired OTP.',
     'registration_failed'           => 'Registration failed. Please try again.',
 
-
     'ministry_stored'               => 'Ministry has been stored successfully.',
     'ministry_retrieved'            => 'Ministry data retrieved successfully.',
     'ministries_retrieved'          => 'Ministries data retrieved successfully.',
@@ -34,7 +33,9 @@ return [
     'ministry_branches_retrieved'   => 'Ministry\'s branches data retrieved successfully.',
     'ministry_not_found'            => 'Ministry not found.',
     'governorates_retrieved'        => 'Governorates retrieved successfully.',
-    'ministry_branch_mismatch'       => 'The selected branch does not belong to the chosen ministry.',
+    'ministry_branch_mismatch'      => 'The selected branch does not belong to the chosen ministry.',
+    'ministry_requires_branch'      => 'This ministry has branches. Please select the appropriate branch to submit your complaint.',
+
 
     'ministry_manager_assigned_success' => 'The employee has been successfully assigned as the ministry manager.',
     'ministry_manager_assignment_failed' => 'This employee cannot be assigned because they do not belong to this ministry.',

@@ -8,6 +8,7 @@ use App\Http\Resources\ComplaintResource;
 use App\Models\Complaint;
 use App\Services\ComplaintService;
 use App\Traits\ResponseTrait;
+use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,15 +26,22 @@ class ComplaintController extends Controller
 
     public function submit(SubmitComplaintRequest $request)
     {
-        $data = $request->validated();
-        $data['citizen_id'] = Auth::user()->citizen->id;
-        $complaint = $this->service->submitComplaint($data);
+        try {
+            $data = $request->validated();
+            $data['citizen_id'] = Auth::user()->citizen->id;
+            $complaint = $this->service->submitComplaint($data);
 
-        return $this->successResponse(
-            ['complaint' => new ComplaintResource($complaint)],
-            __('messages.complaint_submitted'),
-            201
-        );
+            return $this->successResponse(
+                ['complaint' => new ComplaintResource($complaint)],
+                __('messages.complaint_submitted'),
+                201
+            );
+        } catch (Exception $e) {
+            return $this->errorResponse(
+                __("messages.{$e->getMessage()}"),
+                409
+            );
+        }
     }
 
     public function read()
