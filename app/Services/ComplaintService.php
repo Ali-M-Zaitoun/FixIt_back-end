@@ -195,6 +195,7 @@ class ComplaintService
         $complaint = $this->complaintDAO->updateStatus($complaint, $status, __("messages.$messageKey"));
 
         app()->setLocale($originalLocale);
+
         activity()
             ->performedOn($complaint)
             ->event($status)

@@ -98,7 +98,6 @@
                     continue;
                     }
 
-
                     $config = match(true) {
                     $isNew => ['color' => 'text-emerald-700', 'bg' => 'bg-emerald-50', 'ar' => 'جديد', 'en' => 'New', 'border' => 'border-emerald-400'],
                     $isResolved => ['color' => 'text-blue-700', 'bg' => 'bg-blue-50', 'ar' => 'تم الحل', 'en' => 'Resolved', 'border' => 'border-blue-400'],

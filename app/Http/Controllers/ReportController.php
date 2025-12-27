@@ -6,10 +6,8 @@ use App\Models\Complaint;
 use App\Models\Ministry;
 use App\Models\MinistryBranch;
 use App\Services\ComplaintService;
-use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
 use \Spatie\LaravelPdf\Facades\Pdf;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class ReportController extends Controller
 {

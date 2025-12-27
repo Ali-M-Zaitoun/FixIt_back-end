@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\CitizenController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\EmployeeController;
@@ -10,7 +11,6 @@ use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserOTPController;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(UserController::class)->group(function () {
@@ -30,6 +30,7 @@ Route::post('testNotification', [FcmTokenController::class, 'testNotification'])
 Route::get('my_tokens', [FcmTokenController::class, 'my_tokens'])->middleware('auth:sanctum');
 
 
+Route::get('getLog', [ActivityController::class, 'getLog'])->middleware('auth:sanctum');
 Route::post('verify-otp', [UserOTPController::class, 'verifyOtp']);
 Route::post('resend-otp', [UserOTPController::class, 'resendOtp']);
 
@@ -58,9 +59,11 @@ Route::prefix('complaint')
     });
 
 
-Route::get('downloadComplaintReport/{complaint}', [ReportController::class, 'downloadComplaintReport']);
-Route::get('downloadBranchReport/{branch}', [ReportController::class, 'downloadBranchReport']);
-Route::get('downloadMinistryReport/{ministry}', [ReportController::class, 'downloadMinistryReport']);
+/* For Testing */
+
+// Route::get('downloadComplaintReport/{complaint}', [ReportController::class, 'downloadComplaintReport']);
+// Route::get('downloadBranchReport/{branch}', [ReportController::class, 'downloadBranchReport']);
+// Route::get('downloadMinistryReport/{ministry}', [ReportController::class, 'downloadMinistryReport']);
 
 Route::prefix('complaint/reply')
     ->middleware(['auth:sanctum', 'active.user'])
