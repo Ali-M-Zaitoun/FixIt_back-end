@@ -32,10 +32,13 @@ class MinistryBranchDAO
         return MinistryBranch::where('id', $id)->first();
     }
 
-    public function assignManager($id, $manager_id)
+    public function assignManager($branch, $employee_id)
     {
-        $branch = $this->readOne($id);
-        $branch->update(['manager_id' => $manager_id]);
-        return $branch;
+        return $branch->update(['manager_id' => $employee_id]);
+    }
+
+    public function removeManager($branch)
+    {
+        return $branch->update(['manager_id' => null]);
     }
 }

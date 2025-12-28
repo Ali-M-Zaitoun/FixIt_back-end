@@ -38,9 +38,11 @@ return [
 
 
     'ministry_manager_assigned_success' => 'The employee has been successfully assigned as the ministry manager.',
+    'ministry_manager_removed_success'  => 'The manager\'s privileges have been successfully revoked.',
     'ministry_manager_assignment_failed' => 'This employee cannot be assigned because they do not belong to this ministry.',
 
     'branch_manager_assigned_success' => 'The employee has been successfully assigned as the branch manager.',
+    'branch_manager_removed_success'  => 'The branch manager\'s privileges have been successfully revoked.',
     'branch_manager_assignment_failed' => 'This employee cannot be assigned because they do not belong to this branch.',
 
 

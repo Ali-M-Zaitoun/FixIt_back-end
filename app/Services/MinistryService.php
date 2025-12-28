@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DAO\MinistryDAO;
 use App\Http\Resources\MinistryResource;
+use App\Models\Employee;
 use Illuminate\Support\Facades\Cache;
 
 class MinistryService
@@ -39,15 +40,26 @@ class MinistryService
         return $ministry;
     }
 
-    public function assignManager($id, $manager_id, EmployeeService $employeeService)
+    public function assignManager($ministry, $employee)
     {
-        $emp = $employeeService->readOne($manager_id);
-        if ($id != $emp->ministry_id)
+        if ($ministry->id != $employee->ministry_id)
             return false;
 
-        Cache::forget("Ministry {$id}");
-        $ministry = $this->dao->assignManager($id, $manager_id);
-        $emp->user->syncRoles(['employee', 'ministry_manager']);
+        Cache::forget("Ministry {$ministry->id}");
+        $ministry = $this->dao->assignManager($ministry, $employee->id);
+        $employee->user->syncRoles(['employee', 'ministry_manager']);
+        $employee->user->update(['role' => 'ministry_manager']);
+        return $ministry;
+    }
+
+    public function removeManager($ministry)
+    {
+        Cache::forget("Ministry {$ministry->id}");
+
+        $employee = Employee::find($ministry->manager_id);
+        $employee->user->update(['role' => 'employee']);
+        $employee->user->assignRole('employee');
+        $ministry = $this->dao->removeManager($ministry);
         return $ministry;
     }
 }

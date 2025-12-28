@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\MinistryRequest;
 use App\Http\Resources\GovernorateResource;
 use App\Http\Resources\MinistryResource;
+use App\Models\Employee;
 use App\Models\Governorate;
+use App\Models\Ministry;
 use App\Services\EmployeeService;
 use App\Services\MinistryService;
 use App\Traits\ResponseTrait;
@@ -40,24 +42,23 @@ class MinistryController extends Controller
         return $this->successResponse(MinistryResource::collection($data), __('messages.ministries_retrieved'), 200);
     }
 
-    public function readOne($id)
+    public function readOne(Ministry $ministry)
     {
-        $ministry = $this->service->readOne($id);
-
-        if (!$ministry)
-            return $this->errorResponse(__('messages.ministry_not_found'), 404);
-
         return $this->successResponse(new MinistryResource($ministry), __('messages.ministry_retrieved'), 200);
     }
 
-    public function assignManager($id, $manager_id, EmployeeService $employeeService)
+    public function assignManager(Ministry $ministry, Employee $employee)
     {
-        $ministry = $this->service->assignManager($id, $manager_id, $employeeService);
+        $this->service->assignManager($ministry, $employee);
 
-        if ($ministry)
-            return $this->successResponse(new MinistryResource($ministry), __('messages.ministry_manager_assigned_success'), 200);
+        return $this->successResponse(new MinistryResource($ministry), __('messages.ministry_manager_assigned_success'), 200);
+    }
 
-        return $this->errorResponse(__('messages.ministry_manager_assignment_failed'));
+    public function removeManager(Ministry $ministry)
+    {
+        $this->service->removeManager($ministry);
+
+        return $this->successResponse(new MinistryResource($ministry), __('messages.ministry_manager_removed_success'), 200);
     }
 
     public function getGovernorates()

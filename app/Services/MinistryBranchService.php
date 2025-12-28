@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DAO\MinistryBranchDAO;
+use App\Models\Employee;
 use Illuminate\Support\Facades\Cache;
 
 class MinistryBranchService
@@ -37,14 +38,23 @@ class MinistryBranchService
         return $branch;
     }
 
-    public function assignManager($id, $manager_id, EmployeeService $employeeService)
+    public function assignManager($branch, $employee)
     {
-        $emp = $employeeService->readOne($manager_id);
-        Cache::forget("Branch {$id}");
-        $ministry = $this->dao->assignManager($id, $manager_id);
+        Cache::forget("Branch {$branch->id}");
+        $branch = $this->dao->assignManager($branch, $employee->id);
 
-        $emp->user->syncRoles(['employee', 'branch_manager']);
+        $employee->user->syncRoles(['employee', 'branch_manager']);
+        $employee->user->update(['role' => 'branch_manager']);
+        return $branch;
+    }
 
-        return $ministry;
+    public function removeManager($branch)
+    {
+        Cache::forget("Branch {$branch->id}");
+        $employee = Employee::find($branch->manager_id);
+        $employee->user->update(['role' => 'employee']);
+        $employee->user->assignRole('employee');
+        $branch = $this->dao->removeManager($branch);
+        return $branch;
     }
 }

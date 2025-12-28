@@ -6,6 +6,7 @@ use App\DAO\MinistryBranchDAO;
 use App\Http\Requests\MinistryBranchRequest;
 use App\Http\Resources\MinistryBranchResource;
 use App\Http\Resources\MinistryResource;
+use App\Models\Employee;
 use App\Models\Ministry;
 use App\Models\MinistryBranch;
 use App\Services\MinistryBranchService;
@@ -16,12 +17,9 @@ class MinistryBranchController extends Controller
 {
     use ResponseTrait;
 
-    protected MinistryBranchService $service;
-
-    public function __construct()
-    {
-        $this->service = new MinistryBranchService();
-    }
+    public function __construct(
+        protected MinistryBranchService $service
+    ) {}
 
     public function store(MinistryBranchRequest $request)
     {
@@ -53,9 +51,15 @@ class MinistryBranchController extends Controller
         return $this->successResponse($data, __('messages.ministry_branches_retrieved'));
     }
 
-    public function assignManager($id, $manager_id)
+    public function assignManager(MinistryBranch $branch, Employee $employee)
     {
-        $branch = $this->service->assignManager($id, $manager_id);
-        return $this->successResponse(MinistryBranchResource::collection($branch), __('messages.employee_promoted'), 200);
+        $this->service->assignManager($branch, $employee);
+        return $this->successResponse(new MinistryBranchResource($branch), __('messages.branch_manager_assigned_success'), 200);
+    }
+
+    public function removeManager(MinistryBranch $branch)
+    {
+        $this->service->removeManager($branch);
+        return $this->successResponse(new MinistryBranchResource($branch), __('messages.branch_manager_removed_success'), 200);
     }
 }

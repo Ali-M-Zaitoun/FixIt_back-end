@@ -37,10 +37,13 @@ class MinistryDAO
         return Ministry::where('id', $id)->first();
     }
 
-    public function assignManager($id, $manager_id)
+    public function assignManager($ministry, $employee_id)
     {
-        $ministry = $this->readOne($id);
-        $ministry->update(['manager_id' => $manager_id]);
-        return $ministry;
+        return $ministry->update(['manager_id' => $employee_id]);
+    }
+
+    public function removeManager($ministry)
+    {
+        return $ministry->update(['manager_id' => null]);
     }
 }

@@ -58,7 +58,6 @@ Route::prefix('complaint')
         Route::get('downloadMinistryReport/{ministry}', 'downloadMinistryReport');
     });
 
-
 /* For Testing */
 
 // Route::get('downloadComplaintReport/{complaint}', [ReportController::class, 'downloadComplaintReport']);
@@ -83,8 +82,9 @@ Route::prefix('ministry')
         Route::controller(MinistryController::class)->group(function () {
             Route::post('store', 'store')->middleware('role:super_admin');
             Route::get('read', 'read');
-            Route::get('readOne/{id}', 'readOne');
-            Route::post('{id}/assign-manager/{manager_id}', 'assignManager')->middleware('role:super_admin');
+            Route::get('readOne/{ministry}', 'readOne');
+            Route::post('{ministry}/assign-manager/{employee}', 'assignManager')->middleware('role:super_admin');
+            Route::post('{ministry}/remove-manager', 'removeManager')->middleware('role:super_admin');
         });
 
         Route::get('{ministry_id}/complaints', [ComplaintController::class, 'getByMinistry'])
@@ -94,7 +94,8 @@ Route::prefix('ministry')
             Route::post('store', 'store')->middleware('role:super_admin');
             Route::get('read', 'read');
             Route::get('read/{id}', 'readOne');
-            Route::post('{id}/assign-manager/{manager_id}', 'assignManager')->middleware('role:super_admin|ministry_manager');
+            Route::post('{branch}/assign-manager/{employee}', 'assignManager')->middleware('role:super_admin|ministry_manager');
+            Route::post('{branch}/remove-manager', 'removeManager')->middleware('role:super_admin|ministry_manager');
         });
         Route::get('branch/{branch_id}/complaints', [ComplaintController::class, 'getByBranch'])->middleware('permission:complaint.read');
     });

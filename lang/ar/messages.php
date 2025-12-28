@@ -37,10 +37,12 @@ return [
     'ministry_requires_branch'      => 'هذه الوزارة لديها أفرع، يرجى اختيار الفرع المناسب لتقديم الشكوى.',
 
 
-    'ministry_manager_assigned_success'  => 'تم تعيين الموظف كمسؤول عن الوزارة بنجاح.',
+    'ministry_manager_assigned_success' => 'تم تعيين الموظف بنجاح كمدير للوزارة.',
+    'ministry_manager_removed_success'  => 'تم إزالة صلاحيات المدير بنجاح.',
     'ministry_manager_assignment_failed' => 'لا يمكن تعيين هذا الموظف لأنه لا يتبع هذه الوزارة.',
 
-    'branch_manager_assigned_success'  => 'تم تعيين الموظف كمسؤول عن الفرع بنجاح.',
+    'branch_manager_assigned_success' => 'تم تعيين الموظف بنجاح كمدير للفرع.',
+    'branch_manager_removed_success'  => 'تم إزالة صلاحيات مدير الفرع بنجاح.',
     'branch_manager_assignment_failed' => 'لا يمكن تعيين هذا الموظف لأنه لا يتبع هذا الفرع.',
 
     'employee_stored'               => 'تم إضافة الموظف بنجاح. تم إرسال رمز التحقق (OTP) إلى بريده الالكتروني.',
