@@ -9,6 +9,7 @@ use App\Http\Controllers\MinistryBranchController;
 use App\Http\Controllers\MinistryController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserOTPController;
 use Illuminate\Support\Facades\Route;
@@ -118,4 +119,13 @@ Route::prefix('citizen')->middleware(['auth:sanctum', 'active.user'])->controlle
     Route::get('read', 'read');
     Route::get('read/{id}', 'readOne');
     Route::get('myAccount', 'myAccount');
+});
+
+
+Route::prefix('statistics')->middleware(['auth:sanctum', 'role:super_admin'])->controller(StatisticsController::class)->group(function () {
+    Route::get('statsByStatus', 'statsByStatus');
+    Route::get('statsByMinistryAndBranch', 'statsByMinistryAndBranch');
+    Route::get('statsByMonth', 'statsByMonth');
+    Route::get('statsByUserActivity', 'statsByUserActivity');
+    Route::get('getActivity', 'getActivity');
 });
