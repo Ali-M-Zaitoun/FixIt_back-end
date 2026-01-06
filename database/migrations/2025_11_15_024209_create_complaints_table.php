@@ -27,6 +27,7 @@ return new class extends Migration
             $table->foreignId('locked_by')->nullable()->constrained('employees');
             $table->timestamp('locked_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

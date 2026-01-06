@@ -17,6 +17,7 @@ return new class extends Migration
             $table->morphs('sender');
             $table->text('content');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

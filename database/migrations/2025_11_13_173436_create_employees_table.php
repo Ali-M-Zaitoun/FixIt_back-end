@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('end_date')->nullable();
             $table->timestamp('promoted_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

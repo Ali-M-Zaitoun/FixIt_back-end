@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('ministry_id')->constrained();
             $table->foreignId('governorate_id')->constrained('governorates');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -66,7 +66,7 @@ class MinistryService
         return $ministry;
     }
 
-    public function delete($ministry)
+    public function delete(Ministry $ministry)
     {
         $this->cacheManager->clearMinistry($ministry->id);
         return $this->ministrtDAO->delete($ministry);

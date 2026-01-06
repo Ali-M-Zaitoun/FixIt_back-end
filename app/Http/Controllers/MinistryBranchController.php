@@ -8,6 +8,8 @@ use App\Models\Employee;
 use App\Models\MinistryBranch;
 use App\Services\MinistryBranchService;
 use App\Traits\ResponseTrait;
+use Illuminate\Http\Request;
+
 
 class MinistryBranchController extends Controller
 {
@@ -47,6 +49,17 @@ class MinistryBranchController extends Controller
         return $this->successResponse($data, __('messages.ministry_branches_retrieved'));
     }
 
+    public function update(MinistryBranch $branch, Request $request)
+    {
+        $ministry = $this->service->update($branch, $request->all());
+        return $this->successResponse([], __('messages.success'));
+    }
+
+    public function delete(MinistryBranch $branch)
+    {
+        $this->service->delete($branch);
+        return $this->successResponse([], __('messages.deleted_successfully'));
+    }
     public function assignManager(MinistryBranch $branch, Employee $employee)
     {
         $this->service->assignManager($branch, $employee);

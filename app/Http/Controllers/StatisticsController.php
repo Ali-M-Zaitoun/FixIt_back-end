@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\LogResource;
+use App\Http\Resources\ActivityResource;
 use App\Models\Complaint;
 use App\Traits\ResponseTrait;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +14,7 @@ class StatisticsController extends Controller
     public function getActivity()
     {
         $activities = Activity::all();
-        return $this->successResponse(LogResource::collection($activities), __('messages.success'));
+        return $this->successResponse(ActivityResource::collection($activities), __('messages.success'));
     }
 
 

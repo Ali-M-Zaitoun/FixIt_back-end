@@ -8,11 +8,11 @@ use App\Http\Resources\MinistryResource;
 use App\Models\Employee;
 use App\Models\Governorate;
 use App\Models\Ministry;
-use App\Services\EmployeeService;
 use App\Services\MinistryService;
 use App\Traits\ResponseTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;
 
 class MinistryController extends Controller
 {
@@ -22,7 +22,6 @@ class MinistryController extends Controller
 
     public function store(MinistryRequest $request)
     {
-        $user = Auth::user();
         $ministry = $this->service->store($request->validated());
 
         if ($ministry)
@@ -61,16 +60,16 @@ class MinistryController extends Controller
         return $this->successResponse(new MinistryResource($ministry), __('messages.ministry_manager_removed_success'), 200);
     }
 
-    public function update(Ministry $ministry, $data) {
-        $ministry = $this->service->update()
+    public function update(Ministry $ministry, Request $request)
+    {
+        $ministry = $this->service->update($ministry, $request->all());
+        return $this->successResponse($ministry, __('messages.success'));
     }
 
     public function delete(Ministry $ministry)
     {
-        if ($this->service->delete($ministry)) {
-            return $this->successResponse([], __('messages.deleted_successfully'));
-        }
-        return $this->errorResponse(__('messages.error'));
+        $this->service->delete($ministry);
+        return $this->successResponse([], __('messages.deleted_successfully'));
     }
 
     public function getGovernorates()

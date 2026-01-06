@@ -6,6 +6,7 @@ use App\DAO\MinistryBranchDAO;
 use App\Models\Employee;
 use App\Models\MinistryBranch;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class MinistryBranchService
 {
@@ -58,6 +59,13 @@ class MinistryBranchService
         $employee->user->assignRole('employee');
         $branch = $this->dao->removeManager($branch);
         return $branch;
+    }
+
+    public function update(MinistryBranch $branch, $data)
+    {
+        return DB::transaction(function () use ($branch, $data) {
+            return $this->dao->update($branch, $data);
+        });
     }
 
     public function delete(MinistryBranch $branch)
