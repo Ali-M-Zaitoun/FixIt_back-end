@@ -137,6 +137,7 @@ class ComplaintService
 
     public function read()
     {
+        // return $this->complaintDAO->read();
         return $this->cacheManager->getAll(
             fn() => $this->complaintDAO->read()
         );

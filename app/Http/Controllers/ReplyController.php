@@ -17,12 +17,8 @@ class ReplyController extends Controller
 {
     use ResponseTrait, AuthorizesRequests;
 
-    protected $replyService;
+    public function __construct(protected ReplyService $replyService) {}
 
-    public function __construct(ReplyService $replyService)
-    {
-        $this->replyService = $replyService;
-    }
     public function addReply(Complaint $complaint, Request $request)
     {
         $this->authorize('view', $complaint);
@@ -47,11 +43,10 @@ class ReplyController extends Controller
     {
         $this->authorize('view', $complaint);
 
-        $result = $this->replyService->readReplies($complaint);
-
-        if (!isEmpty($result))
-            return $this->successResponse(ReplyResource::collection($result), __('messages.replies_retrieved'));
-        return $this->successResponse([], __('messages.empty'));
+        $result = $this->replyService->read($complaint);
+        if ($result->isEmpty())
+            return $this->successResponse([], __('messages.empty'));
+        return $this->successResponse(ReplyResource::collection($result), __('messages.replies_retrieved'));
     }
 
     public function delete(Reply $reply)

@@ -2,16 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\DAO\MinistryBranchDAO;
 use App\Http\Requests\MinistryBranchRequest;
 use App\Http\Resources\MinistryBranchResource;
-use App\Http\Resources\MinistryResource;
 use App\Models\Employee;
-use App\Models\Ministry;
 use App\Models\MinistryBranch;
 use App\Services\MinistryBranchService;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\Request;
 
 class MinistryBranchController extends Controller
 {

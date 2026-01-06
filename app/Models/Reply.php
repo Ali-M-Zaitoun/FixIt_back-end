@@ -17,6 +17,11 @@ class Reply extends Model
         'sender_id'
     ];
 
+    public function complaint()
+    {
+        return $this->belongsTo(Complaint::class);
+    }
+
     public function media()
     {
         return $this->morphMany(Media::class, 'mediable');

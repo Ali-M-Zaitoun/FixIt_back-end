@@ -83,8 +83,10 @@ Route::prefix('ministry')
             Route::post('store', 'store')->middleware('role:super_admin');
             Route::get('read', 'read');
             Route::get('readOne/{ministry}', 'readOne');
+            Route::post('update/{ministry}', 'update');
             Route::post('{ministry}/assign-manager/{employee}', 'assignManager')->middleware('role:super_admin');
             Route::post('{ministry}/remove-manager', 'removeManager')->middleware('role:super_admin');
+            Route::delete('delete/{ministry}', 'delete')->middleware('role:super_admin');
         });
 
         Route::get('{ministry_id}/complaints', [ComplaintController::class, 'getByMinistry'])
@@ -94,10 +96,12 @@ Route::prefix('ministry')
             Route::post('store', 'store')->middleware('role:super_admin');
             Route::get('read', 'read');
             Route::get('read/{id}', 'readOne');
+            Route::post('update/{branch}', 'update');
             Route::post('{branch}/assign-manager/{employee}', 'assignManager')->middleware('role:super_admin|ministry_manager');
             Route::post('{branch}/remove-manager', 'removeManager')->middleware('role:super_admin|ministry_manager');
+            Route::delete('delete/{branch}', 'delete');
         });
-        Route::get('branch/{branch_id}/complaints', [ComplaintController::class, 'getByBranch'])->middleware('permission:complaint.read');
+        Route::get('branch/{branch_id}/complaints', [ComplaintController::class, 'getByBranch']);
     });
 
 Route::prefix('employee')->middleware(['auth:sanctum', 'active.user'])->controller(EmployeeController::class)->group(function () {

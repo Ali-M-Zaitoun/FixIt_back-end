@@ -19,7 +19,7 @@ class EmployeeResource extends JsonResource
                 'name'           => $this->ministry->translation($locale)->name,
                 'abbreviation'   => $this->ministry->abbreviation,
             ],
-            'ministry_branch_id' => $this->ministry_branch_id
+            'ministry_branch_id' => $this->ministry_branch_id,
         ];
     }
 }

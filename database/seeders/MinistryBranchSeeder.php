@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Employee;
 use App\Models\Ministry;
 use App\Models\MinistryBranch;
 use Illuminate\Database\Seeder;

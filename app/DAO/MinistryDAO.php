@@ -23,14 +23,37 @@ class MinistryDAO
         return $ministry;
     }
 
-    public function readAll()
+    public function read()
     {
         return Ministry::all();
     }
 
-    public function update($id, $data) {}
+    public function update(Ministry $ministry, $data)
+    {
+        $ministry->update(
+            collect($data)
+                ->only(['status', 'abbreviation'])
+                ->filter(fn($value) => $value != null)
+                ->toArray()
+        );
 
-    public function delete($id) {}
+        if (isset($data['translations'])) {
+            foreach ($data['translations'] as $locale => $trans) {
+                $ministry->translations()->updateOrCreate(
+                    ['locale' => $locale],
+                    [
+                        'name'        => $trans['name'],
+                        'description' => $trans['description'] ?? null,
+                    ]
+                );
+            }
+        }
+    }
+
+    public function delete(Ministry $ministry)
+    {
+        $ministry->delete();
+    }
 
     public function readOne($id)
     {

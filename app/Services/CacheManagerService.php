@@ -69,4 +69,104 @@ class CacheManagerService
 
         return Cache::remember($key, 3600, $resolver);
     }
+
+    /////////////////////////////
+    //        Ministry         //
+    /////////////////////////////
+
+    public function clearMinistries()
+    {
+        Cache::forget("all_ministries");
+    }
+
+    public function clearMinistry($id)
+    {
+        Cache::forget("Ministry {$id}");
+    }
+
+    public function getMinistries(Closure $resolver)
+    {
+        $cacheKey = "all_ministries";
+        return Cache::remember($cacheKey, 86400, $resolver);
+    }
+
+    public function getMinistry(int $id, $resolver)
+    {
+        $cacheKey = "Ministry {$id}";
+        return Cache::remember($cacheKey, 3600, $resolver);
+    }
+
+    /////////////////////////////
+    //        Branch           //
+    /////////////////////////////
+
+    public function clearBranches()
+    {
+        return Cache::forget("all_branches");
+    }
+
+    public function clearMinistryBranches($id)
+    {
+        return Cache::forget("branches_for_ministry {$id}");
+    }
+
+    public function getBranches(Closure $resolver)
+    {
+        $cacheKey = "all_branches";
+        return Cache::remember($cacheKey, 86400, $resolver);
+    }
+
+    public function getMinistryBranches(int $id, $resolver)
+    {
+        $cacheKey = "branches_for_ministry {$id}";
+        return Cache::remember($cacheKey, 3600, $resolver);
+    }
+
+    public function clearBranch($id)
+    {
+        return Cache::forget("Branch {$id}");
+    }
+
+    public function getBranchInfo($id, Closure $resolver)
+    {
+        $cacheKey = "Branch {$id}";
+        return Cache::remember($cacheKey, 3600, $resolver);
+    }
+
+    /////////////////////////////
+    //        Employee         //
+    /////////////////////////////
+
+    public function clearEmployees()
+    {
+        Cache::forget("all_employees");
+    }
+
+    public function clearBranchEmployees($id)
+    {
+        Cache::forget("employees_in_branch {$id}");
+    }
+
+    public function clearMinistryEmployees($id)
+    {
+        Cache::forget("employees_in_ministry {$id}");
+    }
+
+    public function getEmployees(Closure $resolver)
+    {
+        $cacheKey = "all_employees";
+        return Cache::remember($cacheKey, 4000, $resolver);
+    }
+
+    public function getEmployeesInBranch($branch_id, Closure $resolver)
+    {
+        $cacheKey = "employees_in_branch {$branch_id}";
+        return Cache::remember($cacheKey, 4000, $resolver);
+    }
+
+    public function getEmployeesInMinistry($ministry_id, Closure $resolver)
+    {
+        $cacheKey = "employees_in_ministry {$ministry_id}";
+        return Cache::remember($cacheKey, 4000, $resolver);
+    }
 }

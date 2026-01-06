@@ -8,7 +8,6 @@ use App\Models\MinistryBranch;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Faker\Factory as Faker;
-use Illuminate\Support\Str;
 
 class EmployeeSeeder extends Seeder
 {
@@ -38,7 +37,11 @@ class EmployeeSeeder extends Seeder
                     'address'    => $faker->address,
                 ]);
 
-                $user->assignRole($role);
+                if ($role != "employee") {
+                    $user->syncRoles(['employee', $role]);
+                } else {
+                    $user->assignRole($role);
+                }
 
                 $user->employee()->create([
                     'ministry_id'        => $branch->ministry_id,

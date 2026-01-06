@@ -14,7 +14,7 @@ class ReplyDAO
         ]);
     }
 
-    public function readReplies($complaint)
+    public function read($complaint)
     {
         return $complaint->replies;
     }

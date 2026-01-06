@@ -3,41 +3,44 @@
 namespace App\Services;
 
 use App\DAO\MinistryDAO;
-use App\Http\Resources\MinistryResource;
 use App\Models\Employee;
-use Illuminate\Support\Facades\Cache;
+use App\Models\Ministry;
+use Illuminate\Support\Facades\DB;
 
 class MinistryService
 {
     public function __construct(
-        protected MinistryDAO $dao
+        protected MinistryDAO $ministrtDAO,
+        protected CacheManagerService $cacheManager
     ) {}
 
     public function store(array $data)
     {
-        $ministry = $this->dao->store($data);
-        Cache::forget('all_ministries');
+        $ministry = $this->ministrtDAO->store($data);
+        $this->cacheManager->clearMinistries();
         return $ministry;
     }
 
     public function read()
     {
-        $cacheKey = "all_ministries";
-        $ministries = Cache::remember($cacheKey, 86400, function () {
-            return $this->dao->readAll();
-        });
-
-        return $ministries;
+        return $this->cacheManager->getMinistries(
+            fn() => $this->ministrtDAO->read()
+        );
     }
 
-    public function readOne($id)
+    public function readOne(Ministry $ministry)
     {
-        $cacheKey = "Ministry {$id}";
-        $ministry = Cache::remember($cacheKey, 3600, function () use ($id) {
-            return $this->dao->readOne($id);
-        });
+        return $this->cacheManager->getMinistry(
+            $ministry->id,
+            fn() => $ministry
+        );
+    }
 
-        return $ministry;
+    public function update(Ministry $ministry, $data)
+    {
+        return DB::transaction(function () use ($ministry, $data) {
+            return $this->ministrtDAO->update($ministry, $data);
+        });
     }
 
     public function assignManager($ministry, $employee)
@@ -45,8 +48,8 @@ class MinistryService
         if ($ministry->id != $employee->ministry_id)
             return false;
 
-        Cache::forget("Ministry {$ministry->id}");
-        $ministry = $this->dao->assignManager($ministry, $employee->id);
+        $this->cacheManager->clearMinistry($ministry->id);
+        $ministry = $this->ministrtDAO->assignManager($ministry, $employee->id);
         $employee->user->syncRoles(['employee', 'ministry_manager']);
         $employee->user->update(['role' => 'ministry_manager']);
         return $ministry;
@@ -54,12 +57,18 @@ class MinistryService
 
     public function removeManager($ministry)
     {
-        Cache::forget("Ministry {$ministry->id}");
+        $this->cacheManager->clearMinistry($ministry->id);
 
         $employee = Employee::find($ministry->manager_id);
         $employee->user->update(['role' => 'employee']);
         $employee->user->assignRole('employee');
-        $ministry = $this->dao->removeManager($ministry);
+        $ministry = $this->ministrtDAO->removeManager($ministry);
         return $ministry;
+    }
+
+    public function delete($ministry)
+    {
+        $this->cacheManager->clearMinistry($ministry->id);
+        return $this->ministrtDAO->delete($ministry);
     }
 }

@@ -61,6 +61,18 @@ class MinistryController extends Controller
         return $this->successResponse(new MinistryResource($ministry), __('messages.ministry_manager_removed_success'), 200);
     }
 
+    public function update(Ministry $ministry, $data) {
+        $ministry = $this->service->update()
+    }
+
+    public function delete(Ministry $ministry)
+    {
+        if ($this->service->delete($ministry)) {
+            return $this->successResponse([], __('messages.deleted_successfully'));
+        }
+        return $this->errorResponse(__('messages.error'));
+    }
+
     public function getGovernorates()
     {
         $governorates = Cache::rememberForever('governorates', function () {

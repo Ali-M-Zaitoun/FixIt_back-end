@@ -51,7 +51,10 @@ class EmployeeController extends Controller
             return $this->successResponse([], __('messages.empty'));
         }
 
-        return $this->successResponse(EmployeeResource::collection($data), __('messages.employees_retrieved'));
+        $data->load('user');
+
+        $employees = $data->pluck('user')->filter();
+        return $this->successResponse(UserResource::collection($employees), __('messages.employees_retrieved'));
     }
 
     public function readOne($id)
@@ -62,7 +65,7 @@ class EmployeeController extends Controller
             return $this->successResponse([], __('messages.not_found'));
         }
 
-        return $this->successResponse(new EmployeeResource($data), __('messages.employee_retrieved'));
+        return $this->successResponse(new UserResource($data->user), __('messages.employee_retrieved'));
     }
 
     public function getByBranch($branch_id)
@@ -72,7 +75,10 @@ class EmployeeController extends Controller
         if ($data->isEmpty()) {
             return $this->successResponse([], __('messages.empty'));
         }
-        return $this->successResponse(EmployeeResource::collection($data), __('messages.employees_retrieved'));
+        $data->load('user');
+
+        $employees = $data->pluck('user')->filter();
+        return $this->successResponse(UserResource::collection($employees), __('messages.employees_retrieved'));
     }
 
     public function getByMinistry($ministry_id)
@@ -82,7 +88,10 @@ class EmployeeController extends Controller
         if ($data->isEmpty()) {
             return $this->successResponse([], __('messages.empty'));
         }
-        return $this->successResponse(EmployeeResource::collection($data), __('messages.employees_retrieved'));
+        $data->load('user');
+
+        $employees = $data->pluck('user')->filter();
+        return $this->successResponse(UserResource::collection($employees), __('messages.employees_retrieved'));
     }
 
 

@@ -55,11 +55,11 @@ class ReplyService
         $this->cacheManager->clearComplaintCache(single: $complaint->id);
     }
 
-    public function readReplies($complaint)
+    public function read($complaint)
     {
         return $this->cacheManager->getReplies(
             $complaint->id,
-            fn() => $this->replyDAO->readReplies($complaint)
+            fn() => $this->replyDAO->read($complaint)
         );
     }
 
