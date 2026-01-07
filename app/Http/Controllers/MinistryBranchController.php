@@ -51,7 +51,7 @@ class MinistryBranchController extends Controller
 
     public function update(MinistryBranch $branch, Request $request)
     {
-        $ministry = $this->service->update($branch, $request->all());
+        $this->service->update($branch, $request->all());
         return $this->successResponse([], __('messages.success'));
     }
 

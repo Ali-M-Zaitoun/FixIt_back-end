@@ -40,15 +40,11 @@ class MinistryBranchDAO
                 ->filter(fn($value) => $value != null)
                 ->toArray()
         );
-
         if (isset($data['translations'])) {
-            foreach ($data['translations'] as $locale => $trans) {
+            foreach ($data['translations'] as $locale => $translationData) {
                 $branch->translations()->updateOrCreate(
                     ['locale' => $locale],
-                    [
-                        'name'        => $trans['name'],
-                        'description' => $trans['description'] ?? null,
-                    ]
+                    ['name' => $translationData['name']]
                 );
             }
         }

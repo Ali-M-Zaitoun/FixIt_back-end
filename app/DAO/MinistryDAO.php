@@ -39,12 +39,13 @@ class MinistryDAO
 
         if (isset($data['translations'])) {
             foreach ($data['translations'] as $locale => $trans) {
+                $values = ['name' => $trans['name']];
+                if (array_key_exists('description', $trans))
+                    $values['description'] = $trans['description'];
+
                 $ministry->translations()->updateOrCreate(
                     ['locale' => $locale],
-                    [
-                        'name'        => $trans['name'],
-                        'description' => $trans['description'] ?? null,
-                    ]
+                    $values
                 );
             }
         }
