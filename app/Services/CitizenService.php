@@ -3,61 +3,35 @@
 namespace App\Services;
 
 use App\DAO\CitizenDAO;
-use App\Http\Resources\MinistryResource;
 use App\Models\Citizen;
-use Illuminate\Support\Facades\Cache;
 
 class CitizenService
 {
     public function __construct(
         protected CitizenDAO $citizenDAO,
-        protected FileManagerService $fileManagerService
+        protected CacheManagerService $cacheManager
     ) {}
 
     public function read()
     {
-        $cacheKey = "citizens";
-        return Cache::remember($cacheKey, 1800, function () {
-            return $this->citizenDAO->read();
-        });
+        return $this->cacheManager->getAllCitizens(
+            fn() => $this->citizenDAO->read()
+        );
     }
 
-    public function readOne($id)
+    public function readOne(Citizen $citizen)
     {
-        $cacheKey = "citizen {$id}";
-        return Cache::remember($cacheKey, 1800, function () use ($id) {
-            return $this->citizenDAO->findById($id);
-        });
+        return $this->cacheManager->getCitizenProfile(
+            $citizen->id,
+            fn() => $citizen
+        );
     }
 
-    public function uploadProfileImage($img, $citizen)
+    public function delete($citizen)
     {
-        if (isset($img)) {
-            $this->fileManagerService->storeFile(
-                $citizen,
-                $img,
-                "citizens",
-                'image',
-                fn() => 'img'
-            );
-        }
-        return $citizen;
-    }
+        $this->cacheManager->clearCitizens();
+        $this->cacheManager->clearCitizenProfile($citizen->id);
 
-    public function deleteProfileImage($citizen)
-    {
-        if (!$citizen->image) {
-            return false;
-        }
-
-        return $this->fileManagerService->deleteFile($citizen, $citizen->image->id, 'image');
-    }
-
-    public function updateProfileImage($img, $citizen)
-    {
-        $status = $this->deleteProfileImage($citizen);
-        if ($status) {
-        }
-        return $this->uploadProfileImage($img, $citizen) ? true : false;
+        $this->citizenDAO->delete($citizen);
     }
 }

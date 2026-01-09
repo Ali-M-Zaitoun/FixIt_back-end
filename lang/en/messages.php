@@ -37,8 +37,9 @@ return [
     'ministry_requires_branch'      => 'This ministry has branches. Please select the appropriate branch to submit your complaint.',
 
 
-    'ministry_manager_assigned_success' => 'The employee has been successfully assigned as the ministry manager.',
-    'ministry_manager_removed_success'  => 'The manager\'s privileges have been successfully revoked.',
+    'ministry_manager_assigned_success'  => 'The employee has been successfully assigned as the ministry manager.',
+    'manager_removed_success'            => 'The manager\'s privileges have been successfully revoked.',
+    'manager_removed_failed'             => 'There is no manger to remove.',
     'ministry_manager_assignment_failed' => 'This employee cannot be assigned because they do not belong to this ministry.',
 
     'branch_manager_assigned_success' => 'The employee has been successfully assigned as the branch manager.',
@@ -46,7 +47,7 @@ return [
     'branch_manager_assignment_failed' => 'This employee cannot be assigned because they do not belong to this branch.',
 
 
-    'employee_stored'               => 'Employee has been stored successfully. An OTP has been sent to their email.',
+    'employee_stored'               => 'Employee has been stored successfully.',
     'employee_retrieved'            => 'Employee data retrieved successfully.',
     'employees_retrieved'           => 'Employees data retrieved successfully.',
     'employee_promoted'             => 'Employee has been promoted successfully.',
@@ -65,6 +66,8 @@ return [
     'complaint_already_locked'      => 'You have already taken this complaint for processing.',
     'complaint_started_processing'  => 'Processing of this complaint has started.',
 
+    'complaint_in_progress_body'    => 'Processing has started for complaint No. (:id). You will be notified of any updates as they occur.',
+
     'citizens_retrieved'            => 'Citizens data retrieved successfully.',
     'citizen_retrieved'             => 'Citizen data retrieved successfully.',
     'citizen_updated'               => 'Citizen information has been updated successfully.',
@@ -75,9 +78,17 @@ return [
     'complaint_status_changed'      => 'Your complaint status has changed.',
     'complaint_status_updated'      => 'The complaint status has been updated successfully.',
 
-    'reply_recieved'                => 'New reply to your complaint.',
+    'reply_received'                => 'New reply to your complaint.',
     'reply_sent'                    => 'Reply sent successfully.',
     'reply_failed'                  => 'Failed to send reply, please try again.',
     'replies_retrieved'             => 'Replies data retrieved successfully',
     'reply_not_found'               => 'Reply not found.',
+
+    'noti_read'                     => 'Notification read.',
+    'noti_deleted'                  => 'Notification deleted.',
+
+
+    'validation_error'              => 'The given data was invalid.',
+    'query_exception'               => 'A system error occurred while processing your request. Please contact support and provide this code: :trace_id',
+    'model_not_found'               => 'The requested resource was not found.',
 ];

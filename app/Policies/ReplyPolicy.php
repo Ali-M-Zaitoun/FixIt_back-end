@@ -37,4 +37,22 @@ class ReplyPolicy
         }
         throw new AccessDeniedException();
     }
+
+    public function addReply(User $user, Complaint $complaint)
+    {
+        if ($user->citizen)
+            return true;
+
+        if ($user->employee) {
+            $lockExpired = $complaint->locked_at <= now()->subMinutes(15);
+            $lockedByOther = $complaint->locked_by && $complaint->locked_by != $user->employee->id;
+            if ($lockExpired)
+                return true;
+
+            if (!$lockExpired && !$lockedByOther)
+                return true;
+        }
+
+        throw new AccessDeniedException();
+    }
 }

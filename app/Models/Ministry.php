@@ -18,12 +18,12 @@ class Ministry extends Model
 
     public function branches()
     {
-        return $this->hasMany(MinistryBranch::class);
+        return $this->hasMany(MinistryBranch::class)->withTrashed();
     }
 
     public function manager()
     {
-        return $this->belongsTo(Employee::class, 'manager_id');
+        return $this->belongsTo(Employee::class, 'manager_id')->withTrashed();
     }
 
     public function translations()
@@ -39,7 +39,7 @@ class Ministry extends Model
 
     public function complaints()
     {
-        return $this->hasMany(Complaint::class);
+        return $this->hasMany(Complaint::class)->withTrashed();
     }
 
     public function getActivitylogOptions(): LogOptions

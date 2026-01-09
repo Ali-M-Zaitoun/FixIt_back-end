@@ -9,6 +9,7 @@ class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $locale = app()->getLocale();
         $type = "";
         $id = "";
         $data = "";
@@ -18,7 +19,14 @@ class UserResource extends JsonResource
         } else if ($this->employee) {
             $type = 'employee_id';
             $id = $this->employee->id;
-            $data = new EmployeeResource($this->employee);
+            $data = [
+                'ministry'           => [
+                    'id'             => $this->employee->ministry->id,
+                    'name'           => $this->employee->ministry->translation($locale)->name,
+                    'abbreviation'   => $this->employee->ministry->abbreviation,
+                ],
+                'ministry_branch_id' => $this->employee->ministry_branch_id,
+            ];
         }
         return [
             'id'         => $this->id,

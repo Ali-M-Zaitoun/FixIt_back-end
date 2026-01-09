@@ -23,8 +23,26 @@ class SendFirebaseNotification implements ShouldQueue
         $tokens = [];
         $tokens = $event->user->fcmTokens;
 
+        $event->user->notifications()->create([
+            'id' => \Illuminate\Support\Str::uuid(),
+            'type' => get_class($event),
+            'data' => [
+                'title'      => $event->title,
+                'body'       => $event->body,
+                'ref_number' => $event->refNum,
+                'params'     => $event->data
+            ],
+            'read_at' => null,
+        ]);
+
         foreach ($tokens as $token) {
-            $this->firebase->sendToToken($token->token, $event->title, $event->body, $event->data);
+            $translatedTitle = __('messages.' . $event->title);
+            $translatedBody  = __(
+                'messages.' . $event->body,
+                ['id' => $event->refNum],
+            );
+
+            $this->firebase->sendToToken($token->token, $translatedTitle, $translatedBody, $event->data);
         }
     }
 }

@@ -3,47 +3,50 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\CitizenResource;
-use App\Models\User;
+use App\Models\Citizen;
 use App\Services\CitizenService;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CitizenController extends Controller
 {
     use ResponseTrait;
-    protected CitizenService $service;
 
-    public function __construct(CitizenService $citizenService)
-    {
-        $this->service = $citizenService;
-    }
+    public function __construct(protected CitizenService $citizenService) {}
 
     public function read()
     {
-        $citizens = $this->service->read();
-        if ($citizens->isEmpty()) {
-            return $this->successResponse([], __('messages.empty'));
-        }
+        $citizens = $this->citizenService->read();
 
-        return $this->successResponse(CitizenResource::collection($citizens), __('messages.citizens_retrieved'));
+        return $this->successResponse(
+            CitizenResource::collection($citizens),
+            $citizens->isEmpty() ? __('messages.empty') : __('messages.citizens_retrieved')
+        );
     }
 
-    public function readOne($id)
+    public function readOne(Citizen $citizen)
     {
-        $citizen = $this->service->readOne($id);
-        if (!$citizen) {
-            return $this->errorResponse(__('messages.user_not_found'), 404);
-        }
-        return $this->successResponse(new CitizenResource($citizen), __('messages.citizen_retrieved'));
+        $data = $this->citizenService->readOne($citizen);
+
+        return $this->successResponse(new CitizenResource($data), __('messages.citizen_retrieved'));
     }
 
     public function myAccount()
     {
-        $citizen = $this->service->readOne(Auth::user()->citizen->id);
+        $citizen = Auth::user()->citizen;
+
         if (!$citizen) {
             return $this->errorResponse(__('messages.user_not_found'), 404);
         }
-        return $this->successResponse(new CitizenResource($citizen), __('messages.citizen_retrieved'));
+
+        $data = $this->citizenService->readOne($citizen);
+
+        return $this->successResponse(new CitizenResource($data), __('messages.citizen_retrieved'));
+    }
+
+    public function delete(Citizen $citizen)
+    {
+        $this->citizenService->delete($citizen);
+        return $this->successResponse([], __('messages.success'));
     }
 }

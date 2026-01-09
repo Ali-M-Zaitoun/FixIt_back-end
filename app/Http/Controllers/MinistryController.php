@@ -10,9 +10,9 @@ use App\Models\Governorate;
 use App\Models\Ministry;
 use App\Services\MinistryService;
 use App\Traits\ResponseTrait;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+
 
 class MinistryController extends Controller
 {
@@ -22,23 +22,42 @@ class MinistryController extends Controller
 
     public function store(MinistryRequest $request)
     {
-        $ministry = $this->service->store($request->validated());
+        $ministry = $this->service->callWithLogging('store', $request->validated());
 
-        if ($ministry)
-            return $this->successResponse($ministry, __('messages.ministry_stored'), 201);
-
-        return $this->errorResponse(__('messages.registration_failed'), 500);
+        return $this->successResponse(
+            new MinistryResource($ministry),
+            __('messages.ministry_stored'),
+            201
+        );
     }
 
     public function read()
     {
         $data = $this->service->read();
 
-        if (!$data || $data->isEmpty()) {
-            return $this->successResponse([], __('messages.empty'));
-        }
+        return $this->successCollection(
+            $data,
+            MinistryResource::class,
+            'messages.ministries_retrieved'
+        );
+    }
 
-        return $this->successResponse(MinistryResource::collection($data), __('messages.ministries_retrieved'), 200);
+    public function readAll()
+    {
+        $active = MinistryResource::collection($this->service->read());
+        $trashed = MinistryResource::collection($this->service->readTrashed());
+
+        $data = [
+            'active' => $active,
+            'trashed' => $trashed
+        ];
+
+        $isEmpty = $active->resource->isEmpty() && $trashed->resource->isEmpty();
+
+        return $this->successResponse(
+            $data,
+            $isEmpty ? __('messages.empty') : __('messages.ministries_retrieved')
+        );
     }
 
     public function readOne(Ministry $ministry)
@@ -48,27 +67,28 @@ class MinistryController extends Controller
 
     public function assignManager(Ministry $ministry, Employee $employee)
     {
-        $this->service->assignManager($ministry, $employee);
+        $updated = $this->service->callWithLogging('assignManager', $ministry, $employee);
 
-        return $this->successResponse(new MinistryResource($ministry), __('messages.ministry_manager_assigned_success'), 200);
+        return $this->successResponse(new MinistryResource($updated), __('messages.ministry_manager_assigned_success'), 200);
     }
 
     public function removeManager(Ministry $ministry)
     {
-        $this->service->removeManager($ministry);
+        $updated = $this->service->callWithLogging('removeManager', $ministry);
 
-        return $this->successResponse(new MinistryResource($ministry), __('messages.ministry_manager_removed_success'), 200);
+        return $this->successResponse(new MinistryResource($updated), __('messages.ministry_manager_removed_success'), 200);
     }
 
     public function update(Ministry $ministry, Request $request)
     {
-        $ministry = $this->service->update($ministry, $request->all());
-        return $this->successResponse($ministry, __('messages.success'));
+        $updated = $this->service->callWithLogging('update', $ministry, $request->all());
+
+        return $this->successResponse($updated, __('messages.success'));
     }
 
     public function delete(Ministry $ministry)
     {
-        $this->service->delete($ministry);
+        $this->service->callWithLogging('delete', $ministry);
         return $this->successResponse([], __('messages.deleted_successfully'));
     }
 

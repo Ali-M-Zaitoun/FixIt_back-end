@@ -35,17 +35,17 @@ class Complaint extends Model
 
     public function citizen()
     {
-        return $this->belongsTo(Citizen::class);
+        return $this->belongsTo(Citizen::class)->withTrashed();
     }
 
     public function ministry()
     {
-        return $this->belongsTo(Ministry::class);
+        return $this->belongsTo(Ministry::class)->withTrashed();
     }
 
     public function ministryBranch()
     {
-        return $this->belongsTo(MinistryBranch::class);
+        return $this->belongsTo(MinistryBranch::class)->withTrashed();
     }
 
     public function lockedEmployee()
@@ -55,7 +55,7 @@ class Complaint extends Model
 
     public function replies()
     {
-        return $this->hasMany(Reply::class);
+        return $this->hasMany(Reply::class)->withTrashed();
     }
 
     public function governorate()

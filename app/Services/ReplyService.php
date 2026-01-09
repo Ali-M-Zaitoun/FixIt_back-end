@@ -27,7 +27,11 @@ class ReplyService
                 $this->storeReplyMedia($complaint, $reply, $data['media']);
             }
             if ($sender instanceof Employee) {
-                event(new NotificationRequested($complaint->citizen->user, __('messages.reply_received'), $data['content']));
+                event(new NotificationRequested(
+                    $complaint->citizen->user,
+                    'reply_received',
+                    $data['content']
+                ));
             }
             return $reply;
         });

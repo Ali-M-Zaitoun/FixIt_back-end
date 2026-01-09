@@ -2,9 +2,8 @@
 
 namespace App\Exceptions;
 
-use Exception;
-
-class MinistryRequiresBranchException extends Exception
+class MinistryRequiresBranchException extends BusinessException
 {
-    protected $message = 'ministry_requires_branch';
+    protected string $messageKey = 'ministry_requires_branch';
+    protected int $status = 422;
 }

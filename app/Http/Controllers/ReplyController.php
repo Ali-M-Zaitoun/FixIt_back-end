@@ -23,7 +23,7 @@ class ReplyController extends Controller
     {
         $this->authorize('view', $complaint);
         $user = Auth::user();
-        $this->authorize('addReply', $complaint);
+        // $this->authorize('addReply', $complaint);
         $sender = $user->citizen ?? $user->employee;
 
         $request->validate([

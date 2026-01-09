@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\DAO\ComplaintDAO;
 use App\DAO\GovernorateDAO;
+use App\DAO\MinistryDAO;
+use App\DAO\ReplyDAO;
 use App\DTO\ComplaintContext;
 use App\Events\NotificationRequested;
 use App\Exceptions\BranchMismatchException;
@@ -13,6 +15,7 @@ use App\Exceptions\MinistryRequiresBranchException;
 use App\Models\Complaint;
 
 use App\Models\Employee;
+use App\Models\Ministry;
 use App\Traits\Loggable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -25,10 +28,10 @@ class ComplaintService
         protected FileManagerService $fileService,
         protected CacheManagerService $cacheManager,
         protected MinistryBranchService $ministryBranchService,
-        protected ReplyService $replyService,
+        protected ReplyDAO $replyDAO,
         protected EmployeeService $employeeService,
         protected FirebaseNotificationService $firebase,
-        protected MinistryService $ministryService,
+        protected MinistryDAO $ministryDAO,
         protected GovernorateDAO $governorateDAO,
         protected NotificationService $notificationSerivce
     ) {}
@@ -45,12 +48,16 @@ class ComplaintService
 
             $complaint = $this->complaintDAO->submit($data);
 
-
             if ($media) {
                 $this->storeComplaintMedia($complaint, $context->ministryAbbr, $context->governorateCode, $data['reference_number'], $media);
             }
 
-            $this->cacheManager->clearComplaintCache($data['citizen_id']);
+            $this->cacheManager->clearComplaintCache(
+                citizenId: $complaint->citizen_id,
+                branchId: $complaint?->ministry_branch_id,
+                ministryId: $complaint->ministry_id,
+                single: $complaint->id
+            );
 
             DB::afterCommit(
                 fn() =>
@@ -76,7 +83,7 @@ class ComplaintService
             throw new BranchMismatchException();
 
         return new ComplaintContext(
-            ministryAbbr: $branch->ministry->abbreviation,
+            ministryAbbr: $branch->ministry?->abbreviation ?? "UNK",
             governorateCode: $branch->governorate->code,
             governorateId: $branch->governorate->id,
             employees: $branch->employees ?? []
@@ -85,11 +92,12 @@ class ComplaintService
 
     private function resolveFromMinistry($ministryId): ComplaintContext
     {
-        $ministry = $this->ministryService->readOne($ministryId);
-        if ($ministry->branches->isEmpty())
+        $ministry = $this->ministryDAO->readOne($ministryId);
+        if (!$ministry->branches->isEmpty())
             throw new MinistryRequiresBranchException();
+
         return new ComplaintContext(
-            ministryAbbr: $ministry->abbreviation,
+            ministryAbbr: $ministry?->abbreviation,
             governorateCode: "UNK",
             governorateId: NULL,
             employees: collect([$ministry->manager])
@@ -137,36 +145,33 @@ class ComplaintService
 
     public function read()
     {
-        // return $this->complaintDAO->read();
         return $this->cacheManager->getAll(
             fn() => $this->complaintDAO->read()
         );
     }
 
-    public function getByBranch($branch_id)
+    public function getByBranch($branch)
     {
         return $this->cacheManager->getByBranch(
-            $branch_id,
-            fn() => $this->complaintDAO->getByBranch($branch_id)
+            $branch->id,
+            fn() => $this->complaintDAO->getByBranch($branch->id)
         );
     }
 
-    public function getByMinistry($ministry_id)
+    public function getByMinistry(Ministry $ministry)
     {
-        $ministry = $this->ministryService->readOne($ministry_id);
-
         $branchIds = $ministry->branches->pluck('id');
         return $this->cacheManager->getByMinistry(
-            $ministry_id,
+            $ministry->id,
             fn() => $this->complaintDAO->getByMinistry($branchIds)
         );
     }
 
-    public function readOne($id)
+    public function readOne($complaint)
     {
         return $this->cacheManager->getOne(
-            $id,
-            fn() => $this->complaintDAO->readOne($id)
+            $complaint->id,
+            fn() => $complaint
         );
     }
 
@@ -193,7 +198,7 @@ class ComplaintService
 
         app()->setLocale('ar');
 
-        $complaint = $this->complaintDAO->updateStatus($complaint, $status, __("messages.$messageKey"));
+        $complaint = $this->complaintDAO->updateStatus($complaint, $status, $messageKey);
 
         app()->setLocale($originalLocale);
 
@@ -202,9 +207,22 @@ class ComplaintService
             ->event($status)
             ->log($message);
 
-        event(new NotificationRequested($complaint->citizen->user, __('messages.complaint_status_changed'), $message));
+        $this->cacheManager->clearComplaintCache(
+            citizenId: $complaint->citizen_id,
+            branchId: $complaint?->ministry_branch_id,
+            ministryId: $complaint->ministry_id,
+            single: $complaint->id
+        );
 
-        $this->replyService->addReply($complaint, $employee, ['content' => $message]);
+        event(new NotificationRequested(
+            $complaint->citizen->user,
+            'complaint_status_changed',
+            $messageKey,
+            $complaint->reference_number,
+            ['reason' => $reason]
+        ));
+
+        $this->replyDAO->addReply($complaint->id, $employee, $message);
     }
 
     public function startProcessing(Complaint $complaint, Employee $employee): void
@@ -227,12 +245,31 @@ class ComplaintService
 
         $this->complaintDAO->lock($complaint, $employee->id);
 
-        if ($complaint->status !== 'in_progress')
-            $complaint->update(['status' => 'in_progress']);
+        event(new NotificationRequested(
+            $complaint->citizen->user,
+            'complaint_status_changed',
+            'complaint_in_progress_body',
+            $complaint->reference_number
+        ));
+
+        $complaint->update(['status' => 'in_progress']);
+
+        $this->cacheManager->clearComplaintCache(
+            citizenId: $complaint->citizen_id,
+            branchId: $complaint?->ministry_branch_id,
+            ministryId: $complaint->ministry_id,
+            single: $complaint->id
+        );
     }
 
     public function delete($complaint)
     {
+        $this->cacheManager->clearComplaintCache(
+            citizenId: $complaint->citizen_id,
+            branchId: $complaint?->ministry_branch_id,
+            ministryId: $complaint->ministry_id,
+            single: $complaint->id
+        );
         return $this->complaintDAO->delete($complaint);
     }
 }

@@ -21,7 +21,7 @@ class UserController extends Controller
 
     public function signUp(SignUpRequest $request)
     {
-        $result = $this->userService->callWithLogging('signUp', $request->all());
+        $result = $this->userService->signUp($request->all());
         if ($result) {
             return $this->successResponse($result, __('messages.otp_sent'), 201);
         } else {
@@ -31,17 +31,20 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'login' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        $result = $this->userService->login($request->only('login', 'password'));
+        $result = $this->userService->login($credentials);
+
         if (!$result) {
             return $this->errorResponse(__('messages.invalid_credentials'), 401);
         }
+
         $result['user'] = new UserResource($result['user']);
-        return $this->successResponse($result, __('messages.login_success'), 200);
+
+        return $this->successResponse($result, __('messages.login_success'));
     }
 
     public function refreshToken(Request $request)
@@ -67,11 +70,11 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
-        $user = $this->userService->update(Auth::id(), $request->all());
+        $user = $this->userService->update(Auth::user(), $request->all());
         if (!$user)
             return $this->errorResponse(__('messages.user_not_found'), 404);
 
-        return $this->successResponse($user, __('messages.user_info_updated'));
+        return $this->successResponse(new UserResource($user), __('messages.user_info_updated'));
     }
 
     public function uploadProfileImage(Request $request)
@@ -96,36 +99,12 @@ class UserController extends Controller
 
         if ($status) {
             return $this->successResponse(
-                new UserResource($user),
+                new UserResource($user->fresh()),
                 __('messages.deleted_successfully'),
             );
-        } else {
-            return $this->errorResponse(
-                __('messages.img_not_found'),
-            );
         }
-    }
-
-    public function downloadReport(Complaint $complaint)
-    {
-        $ministry = $complaint->ministry;
-        $branch = $complaint->ministryBranch;
-
-        // Get translations for Arabic and English names
-        $ministryAr = "وزارة الكهرباء";
-        $ministryEn = "Electonic Ministry";
-
-        $branchAr = $branch ? ($branch->translations->where('locale', 'ar')->first()?->name ?? $branch->name) : null;
-        $branchEn = $branch ? ($branch->translations->where('locale', 'en')->first()?->name ?? $branch->name) : null;
-
-        return \Spatie\LaravelPdf\Facades\Pdf::view('pdfs.complaint-report', [
-            'complaint' => $complaint,
-            'ministryAr' => $ministryAr,
-            'ministryEn' => $ministryEn,
-            'branchAr' => $branchAr,
-            'branchEn' => $branchEn,
-        ])
-            ->format('a4')
-            ->name("Report-{$complaint->reference_number}.pdf");
+        return $this->errorResponse(
+            __('messages.img_not_found'),
+        );
     }
 }

@@ -3,13 +3,16 @@
 namespace App\Providers;
 
 use App\Models\Complaint;
+use App\Models\Ministry;
 use App\Models\Reply;
+use App\Observers\MinistryObserver;
 use App\Policies\ComplaintPolicy;
 use App\Policies\ReplyPolicy;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
+use Spatie\Activitylog\Models\Activity;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +35,17 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Complaint::class, ComplaintPolicy::class);
         Gate::policy(Reply::class, ReplyPolicy::class);
+
+        Activity::creating(function (Activity $activity) {
+            if (app()->bound('trace_id')) {
+                $traceId = app('trace_id');
+                $activity->trace_id = $traceId;
+
+                $activity->properties = $activity->properties->put('trace_id', $traceId);
+            }
+        });
+
+        Ministry::observe(MinistryObserver::class);
 
         if ($this->app->environment('production')) {
             URL::forceHttps('https');

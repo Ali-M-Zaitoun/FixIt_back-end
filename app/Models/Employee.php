@@ -21,6 +21,8 @@ class Employee extends Model
         'promoted_at',
     ];
 
+    protected $with = ['user'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -28,17 +30,17 @@ class Employee extends Model
 
     public function branch()
     {
-        return $this->belongsTo(MinistryBranch::class, 'ministry_branch_id');
+        return $this->belongsTo(MinistryBranch::class, 'ministry_branch_id')->withTrashed();
     }
 
     public function ministry()
     {
-        return $this->belongsTo(Ministry::class);
+        return $this->belongsTo(Ministry::class)->withTrashed();
     }
 
     public function replies()
     {
-        return $this->morphMany(Reply::class, 'sender');
+        return $this->morphMany(Reply::class, 'sender')->withTrashed();
     }
 
     public function canAccessComplaint($complaint)

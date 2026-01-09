@@ -11,7 +11,7 @@ abstract class BusinessException extends DomainException
 
     public function messageKey(): string
     {
-        return $this->messageKey;
+        return $this->messageKey ?? "error";
     }
 
     public function status(): int

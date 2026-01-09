@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ActivityResource;
 use App\Models\Complaint;
+use App\Models\Employee;
+use App\Models\Ministry;
+use App\Models\MinistryBranch;
 use App\Traits\ResponseTrait;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
 
@@ -76,5 +80,17 @@ class StatisticsController extends Controller
             ->with('citizen.user')
             ->take(10)
             ->get();
+    }
+
+    public function getCounts()
+    {
+        $data = Cache::remember('dashboard_stats', now()->addMinutes(10), function () {
+            return [
+                'employees_count' => Employee::count(),
+                'ministries_count' => Ministry::count(),
+                'branches_count' => MinistryBranch::count(),
+            ];
+        });
+        return $this->successResponse($data, __('messages.success'));
     }
 }

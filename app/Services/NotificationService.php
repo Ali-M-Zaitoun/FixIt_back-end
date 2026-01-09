@@ -11,11 +11,11 @@ class NotificationService
 {
     public function notifyEmployees($employees, string $type): void
     {
-        if (!isEmpty($employees))
+        if (!blank($employees))
             foreach ($employees as $employee) {
                 event(new NotificationRequested(
                     $employee->user,
-                    __('messages.complaint_received'),
+                    'complaint_received',
                     $type
                 ));
             }
@@ -32,7 +32,7 @@ class NotificationService
 
         event(new NotificationRequested(
             $complaint->citizen->user,
-            __('messages.complaint_status_changed'),
+            'complaint_status_changed',
             __("messages.$key", ['reason' => $reason])
         ));
     }

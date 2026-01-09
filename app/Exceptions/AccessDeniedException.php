@@ -2,15 +2,8 @@
 
 namespace App\Exceptions;
 
-use Symfony\Component\HttpKernel\Exception\HttpException;
-
-class AccessDeniedException extends HttpException
+class AccessDeniedException extends BusinessException
 {
-    public function __construct(string $message = null)
-    {
-        parent::__construct(
-            403,
-            $message ?? __('messages.unauthorized')
-        );
-    }
+    protected string $messageKey = 'unauthorized';
+    protected int $status = 403;
 }

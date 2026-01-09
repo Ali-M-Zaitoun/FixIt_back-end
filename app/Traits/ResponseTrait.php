@@ -21,4 +21,12 @@ trait ResponseTrait
             'errors'  => $errors
         ], $code);
     }
+
+    public function successCollection($collection, $resourceClass, $messageKey)
+    {
+        return $this->successResponse(
+            $resourceClass::collection($collection),
+            $collection->isEmpty() ? __('messages.empty') : __($messageKey)
+        );
+    }
 }

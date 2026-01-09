@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddEmployeeRequest;
 use App\Http\Resources\EmployeeResource;
-use App\Http\Resources\UserResource;
+use App\Models\Employee;
 use App\Services\EmployeeService;
-use App\Services\MinistryBranchService;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
 {
@@ -25,19 +23,10 @@ class EmployeeController extends Controller
     {
         $data = $request->validated();
 
-        $result = $this->service->store($data, app(MinistryBranchService::class));
-
-        if (!$result['status']) {
-            return $this->errorResponse(__('messages.ministry_branch_mismatch'), 400);
-        }
-
-        if (!$result['user'] || !$result['user']->employee) {
-            $result['user']?->delete();
-            return $this->errorResponse(__('messages.employee_creation_failed'), 500);
-        }
+        $employee = $this->service->store($data);
 
         return $this->successResponse(
-            ['employee' => new UserResource($result['user'])],
+            ['employee' => new EmployeeResource($employee)],
             __('messages.employee_stored'),
             201
         );
@@ -47,72 +36,50 @@ class EmployeeController extends Controller
     {
         $data = $this->service->read();
 
-        if (!$data || $data->isEmpty()) {
-            return $this->successResponse([], __('messages.empty'));
-        }
-
-        $data->load('user');
-
-        $employees = $data->pluck('user')->filter();
-        return $this->successResponse(UserResource::collection($employees), __('messages.employees_retrieved'));
+        return $this->successResponse(
+            EmployeeResource::collection($data),
+            $data->isEmpty() ? __('messages.employees_retrieved') : __('messages.empty')
+        );
     }
 
-    public function readOne($id)
+    public function readAll()
     {
-        $data = $this->service->readOne($id);
+        $data['active'] = EmployeeResource::collection($this->service->read());
+        $data['trashed'] = EmployeeResource::collection($this->service->readTrashed());
+        return $this->successResponse(
+            $data,
+            blank($data) ? __('messages.employees_retrieved') : __('messages.empty')
+        );
+    }
 
-        if (!$data) {
-            return $this->successResponse([], __('messages.not_found'));
-        }
-
-        return $this->successResponse(new UserResource($data->user), __('messages.employee_retrieved'));
+    public function readOne(Employee $employee)
+    {
+        return $this->successResponse(new EmployeeResource($employee), __('messages.employee_retrieved'));
     }
 
     public function getByBranch($branch_id)
     {
         $data = $this->service->getByBranch($branch_id);
 
-        if ($data->isEmpty()) {
-            return $this->successResponse([], __('messages.empty'));
-        }
-        $data->load('user');
-
-        $employees = $data->pluck('user')->filter();
-        return $this->successResponse(UserResource::collection($employees), __('messages.employees_retrieved'));
+        return $this->successResponse(
+            EmployeeResource::collection($data),
+            $data->isEmpty() ? __('messages.employees_retrieved') : __('messages.empty')
+        );
     }
 
     public function getByMinistry($ministry_id)
     {
         $data = $this->service->getByMinistry($ministry_id);
 
-        if ($data->isEmpty()) {
-            return $this->successResponse([], __('messages.empty'));
-        }
-        $data->load('user');
-
-        $employees = $data->pluck('user')->filter();
-        return $this->successResponse(UserResource::collection($employees), __('messages.employees_retrieved'));
+        return $this->successResponse(
+            EmployeeResource::collection($data),
+            $data->isEmpty() ? __('messages.employees_retrieved') : __('messages.empty')
+        );
     }
 
-
-    public function promoteEmployee(Request $request, $id)
+    public function delete(Employee $employee)
     {
-        $request->validate([
-            'new_role' => 'required|string|max:255',
-            'new_end_date' => 'nullable|date',
-            'ministry_id' => 'nullable|exists:ministries,id',
-            'ministry_branch_id' => 'nullable|exists:ministry_branches,id'
-        ]);
-
-        $new_role = $request->input('new_role');
-        $new_end_date = $request->input('new_end_date');
-
-        $employee = $this->service->promoteEmployee($id, $new_role, $new_end_date);
-
-        return $this->successResponse(
-            ['employee' => $employee],
-            __('messages.employee_promoted'),
-            200
-        );
+        $this->service->delete($employee);
+        return $this->successResponse([], __('messsages.success'));
     }
 }

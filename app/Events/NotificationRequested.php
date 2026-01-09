@@ -19,6 +19,7 @@ class NotificationRequested
         public User $user,
         public string $title,
         public string $body,
+        public string $refNum = "",
         public array $data = []
     ) {}
 

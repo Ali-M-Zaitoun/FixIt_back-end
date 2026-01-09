@@ -36,16 +36,15 @@ return [
     'ministry_branch_mismatch'      => 'الفرع المحدد لا يتبع للوزارة المختارة.',
     'ministry_requires_branch'      => 'هذه الوزارة لديها أفرع، يرجى اختيار الفرع المناسب لتقديم الشكوى.',
 
+    'ministry_manager_assigned_success'  => 'تم تعيين الموظف بنجاح كمدير للوزارة.',
+    'manager_removed_success'            => 'تم إزالة صلاحيات المدير بنجاح.',
+    'manager_removed_failed'             => 'لا يوجد مسل عن هذه الوزارة ليتم إزالته.',
+    'ministry_manager_assignment_failed' => 'لا يمكن تعيين هذا الموظف لأنه لا يتبع لهذه الوزارة.',
 
-    'ministry_manager_assigned_success' => 'تم تعيين الموظف بنجاح كمدير للوزارة.',
-    'ministry_manager_removed_success'  => 'تم إزالة صلاحيات المدير بنجاح.',
-    'ministry_manager_assignment_failed' => 'لا يمكن تعيين هذا الموظف لأنه لا يتبع هذه الوزارة.',
+    'branch_manager_assigned_success'    => 'تم تعيين الموظف بنجاح كمدير للفرع.',
+    'branch_manager_assignment_failed'   => 'لا يمكن تعيين هذا الموظف لأنه لا يتبع لهذا الفرع.',
 
-    'branch_manager_assigned_success' => 'تم تعيين الموظف بنجاح كمدير للفرع.',
-    'branch_manager_removed_success'  => 'تم إزالة صلاحيات مدير الفرع بنجاح.',
-    'branch_manager_assignment_failed' => 'لا يمكن تعيين هذا الموظف لأنه لا يتبع هذا الفرع.',
-
-    'employee_stored'               => 'تم إضافة الموظف بنجاح. تم إرسال رمز التحقق (OTP) إلى بريده الالكتروني.',
+    'employee_stored'               => 'تم إضافة الموظف بنجاح.',
     'employee_retrieved'            => 'تم استرجاع بيانات الموظف بنجاح.',
     'employees_retrieved'           => 'تم استرجاع بيانات الموظفين بنجاح.',
     'employee_promoted'             => 'تم ترقية الموظف بنجاح.',
@@ -64,6 +63,8 @@ return [
     'complaint_already_locked'      => 'لقد استلمت هذه الشكوى بالفعل للمعالجة.',
     'complaint_started_processing'  => 'تم بدء معالجة هذه الشكوى.',
 
+    'complaint_in_progress_body'    => 'تم البدء بمعالجة الشكوى رقم (:id)، وسيتم إعلامكم بأي تحديثات فور صدورها.',
+
     'citizens_retrieved'            => 'تم استرجاع بيانات المواطنين بنجاح.',
     'citizen_retrieved'             => 'تم استرجاع بيانات المواطن بنجاح.',
     'citizen_updated'               => 'تم تحديث معلومات المواطن بنجاح.',
@@ -79,4 +80,11 @@ return [
     'reply_failed'                  => 'فشل في إرسال الرد، حاول مرة أخرى.',
     'replies_retrieved'             => 'تم استرجاع الردود الخاصة بالشكوى بنجاح.',
     'reply_not_found'               => 'الرد غير موجود.',
+
+    'noti_read'                     => 'تم تمييز الإشعار كمقروء.',
+    'noti_deleted'                  => 'تم حذف الإشعار بنجاح.',
+
+    'validation_error'              => 'البيانات المرسلة غير صحيحة.',
+    'query_exception'               => 'حدث خطأ تقني أثناء معالجة طلبك. يرجى مراسلة الدعم الفني وتزويدهم بهذا الرمز: :trace_id',
+    'model_not_found'               => 'المورد المطلوب غير موجود.',
 ];

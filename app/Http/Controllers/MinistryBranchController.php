@@ -21,54 +21,74 @@ class MinistryBranchController extends Controller
 
     public function store(MinistryBranchRequest $request)
     {
-        $ministryBranch = $this->service->store($request->validated());
+        $ministryBranch = $this->service->callWithLogging('store', $request->validated());
 
-        if ($ministryBranch) {
-            return $this->successResponse($ministryBranch, __('messages.ministry_branch_created'), 201);
-        }
-        return $this->errorResponse(__('messages.failed'), 500);
+        return $this->successResponse(
+            new MinistryBranchResource($ministryBranch),
+            __('messages.ministry_branch_created'),
+            201
+        );
     }
 
     public function read()
     {
         $data = $this->service->read();
 
-        if (sizeof($data) < 1) {
-            return $this->successResponse([], __('messages.empty'));
-        }
-
-        return $this->successResponse($data, __('messages.ministries_branches_retrieved'));
+        return $this->successCollection(
+            $data,
+            MinistryBranchResource::class,
+            'messages.ministries_branches_retrieved'
+        );
     }
 
-    public function readOne($id)
+    public function readOne(MinistryBranch $branch)
     {
-        $data = $this->service->readOne($id);
-        if (!$data) {
-            return $this->errorResponse(__('messages.ministry_not_found'), 404);
-        }
-        return $this->successResponse($data, __('messages.ministry_branches_retrieved'));
+        return $this->successResponse(
+            new MinistryBranchResource($branch),
+            __('messages.ministry_branches_retrieved')
+        );
+    }
+
+    public function readAll()
+    {
+        $active = MinistryBranchResource::collection($this->service->read());
+        $trashed = MinistryBranchResource::collection($this->service->readTrashed());
+
+        $data = [
+            'active' => $active,
+            'trashed' => $trashed
+        ];
+
+        $isEmpty = $active->resource->isEmpty() && $trashed->resource->isEmpty();
+        return $this->successResponse(
+            $data,
+            $isEmpty ? __('messages.empty') : __('messages.ministry_branches_retrieved')
+        );
     }
 
     public function update(MinistryBranch $branch, Request $request)
     {
-        $this->service->update($branch, $request->all());
-        return $this->successResponse([], __('messages.success'));
+        $updated = $this->service->callWithLogging('update', $branch, $request->all());
+        return $this->successResponse(
+            new MinistryBranchResource($updated),
+            __('messages.success')
+        );
     }
 
     public function delete(MinistryBranch $branch)
     {
-        $this->service->delete($branch);
+        $this->service->callWithLogging('delete', $branch);
         return $this->successResponse([], __('messages.deleted_successfully'));
     }
     public function assignManager(MinistryBranch $branch, Employee $employee)
     {
-        $this->service->assignManager($branch, $employee);
-        return $this->successResponse(new MinistryBranchResource($branch), __('messages.branch_manager_assigned_success'), 200);
+        $updated = $this->service->callWithLogging('assignManager', $branch, $employee);
+        return $this->successResponse(new MinistryBranchResource($updated), __('messages.branch_manager_assigned_success'), 200);
     }
 
     public function removeManager(MinistryBranch $branch)
     {
-        $this->service->removeManager($branch);
-        return $this->successResponse(new MinistryBranchResource($branch), __('messages.branch_manager_removed_success'), 200);
+        $updated = $this->service->callWithLogging('removeManager', $branch);
+        return $this->successResponse(new MinistryBranchResource($updated), __('messages.branch_manager_removed_success'), 200);
     }
 }

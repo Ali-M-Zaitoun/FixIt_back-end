@@ -6,9 +6,10 @@ use App\Exceptions\BusinessException;
 use App\Http\Requests\SubmitComplaintRequest;
 use App\Http\Resources\ComplaintResource;
 use App\Models\Complaint;
+use App\Models\Ministry;
+use App\Models\MinistryBranch;
 use App\Services\ComplaintService;
 use App\Traits\ResponseTrait;
-use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,31 +23,27 @@ class ComplaintController extends Controller
 
     public function submit(SubmitComplaintRequest $request)
     {
-        try {
-            $data = $request->validated();
-            $data['citizen_id'] = Auth::user()->citizen->id;
-            $complaint = $this->complaintService->callWithLogging('submitComplaint', $data);
+        $data = $request->validated();
+        $data['citizen_id'] = Auth::user()->citizen->id;
 
-            return $this->successResponse(
-                ['complaint' => new ComplaintResource($complaint)],
-                __('messages.complaint_submitted'),
-                201
-            );
-        } catch (Exception $e) {
-            return $this->errorResponse(
-                __("messages.{$e->getMessage()}"),
-                409
-            );
-        }
+        $complaint = $this->complaintService->callWithLogging('submitComplaint', $data);
+
+        return $this->successResponse(
+            ['complaint' => new ComplaintResource($complaint)],
+            __('messages.complaint_submitted'),
+            201
+        );
     }
 
     public function read()
     {
         $complaints = $this->complaintService->read();
-        if ($complaints->isEmpty()) {
-            return $this->successResponse([], __('messages.empty'));
-        }
-        return $this->successResponse(ComplaintResource::collection($complaints), __('messages.complaints_retrieved'));
+
+        return $this->successCollection(
+            $complaints,
+            ComplaintResource::class,
+            'messages.complaints_retrieved'
+        );
     }
 
     public function getMyComplaints()
@@ -62,33 +59,34 @@ class ComplaintController extends Controller
         );
     }
 
-    public function getByMinistry($id)
+    public function getByMinistry(Ministry $ministry)
     {
-        $this->authorize('viewByMinistry', [Complaint::class, $id]);
-        $complaints = $this->complaintService->getByMinistry($id);
+        $this->authorize('viewByMinistry', [Complaint::class, $ministry->id]);
+        $complaints = $this->complaintService->getByMinistry($ministry);
 
-        if ($complaints->isEmpty()) {
-            return $this->successResponse([], __('messages.empty'));
-        }
-
-        return $this->successResponse(ComplaintResource::collection($complaints), __('messages.complaints_retrieved'));
+        return $this->successCollection(
+            $complaints,
+            ComplaintResource::class,
+            'messages.complaints_retrieved'
+        );
     }
 
-    public function getByBranch($id)
+    public function getByBranch(MinistryBranch $branch)
     {
-        $this->authorize('viewByBranch', [Complaint::class, $id]);
-        $complaints = $this->complaintService->getByBranch($id);
+        $this->authorize('viewByBranch', [Complaint::class, $branch->id]);
+        $complaints = $this->complaintService->getByBranch($branch);
 
-        if ($complaints->isEmpty()) {
-            return $this->successResponse([], __('messages.empty'));
-        }
-
-        return $this->successResponse(ComplaintResource::collection($complaints), __('messages.complaints_retrieved'));
+        return $this->successCollection(
+            $complaints,
+            ComplaintResource::class,
+            'messages.complaints_retrieved'
+        );
     }
 
     public function readOne(Complaint $complaint)
     {
         $this->authorize('view', $complaint);
+
         return $this->successResponse(
             new ComplaintResource($complaint),
             __('messages.complaint_retrieved'),
@@ -105,32 +103,22 @@ class ComplaintController extends Controller
         $reason = $request->reason ?? "";
         $this->authorize('view', $complaint);
 
-        $this->complaintService->updateStatus($complaint, $request->status, Auth::user()->employee, $reason);
+        $this->complaintService->callWithLogging('updateStatus', $complaint, $request->status, Auth::user()->employee, $reason);
         return $this->successResponse([], __('messages.complaint_status_updated'));
     }
 
     public function startProcessing(Complaint $complaint)
     {
         $this->authorize('view', $complaint);
-        try {
-            $employee = Auth::user()?->employee;
-            $this->complaintService->startProcessing($complaint, $employee);
-            return $this->successResponse(__('messages.complaint_started_processing'));
-        } catch (BusinessException $e) {
-            return $this->errorResponse(
-                __('messages.' . $e->messageKey()),
-                409
-            );
-        }
+        $employee = Auth::user()?->employee;
+        $this->complaintService->callWithLogging('startProcessing', $complaint, $employee);
+        return $this->successResponse([], __('messages.complaint_started_processing'));
     }
 
     public function delete(Complaint $complaint)
     {
         $this->authorize('view', $complaint);
-        $result = $this->complaintService->delete($complaint);
-        if (!$result) {
-            return $this->errorResponse(__('messages.not_found'), 404);
-        }
+        $this->complaintService->callWithLogging('delete', $complaint);
         return $this->successResponse([], __('messages.deleted_successfully'));
     }
 }

@@ -8,7 +8,13 @@ class LoggingAspect
 {
     public static function logBefore($class, $method, $args)
     {
-        Log::info("Entering $class::$method", ['args' => $args]);
+        $cleanedArgs = collect($args)->map(function ($arg) {
+            return ($arg instanceof \Illuminate\Database\Eloquent\Model)
+                ? get_class($arg) . ':' . $arg->getKey()
+                : $arg;
+        });
+
+        Log::info("Entering $class::$method", ['args' => $cleanedArgs]);
     }
 
     public static function logAfter($class, $method, $result, $time)

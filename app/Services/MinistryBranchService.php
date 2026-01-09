@@ -5,11 +5,13 @@ namespace App\Services;
 use App\DAO\MinistryBranchDAO;
 use App\Models\Employee;
 use App\Models\MinistryBranch;
-use Illuminate\Support\Facades\Cache;
+use App\Traits\Loggable;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class MinistryBranchService
 {
+    use Loggable;
     public function __construct(
         protected MinistryBranchDAO $dao,
         protected CacheManagerService $cacheManager
@@ -17,18 +19,32 @@ class MinistryBranchService
 
     public function store(array $data)
     {
-        $branch = $this->dao->store($data); {
+        return DB::transaction(function () use ($data) {
+            $branchData = [
+                'ministry_id' => $data['ministry_id'],
+                'governorate_id' => $data['governorate_id'],
+            ];
+
+            $branch = $this->dao->store($branchData, $data['translations']);
+
             $this->cacheManager->clearBranches();
             $this->cacheManager->clearMinistryBranches($data['ministry_id']);
-        }
 
-        return $branch;
+            return $branch;
+        });
     }
 
     public function read()
     {
         return $this->cacheManager->getBranches(
             fn() => $this->dao->read()
+        );
+    }
+
+    public function readTrashed()
+    {
+        return $this->cacheManager->getTrashedBranches(
+            fn() => $this->dao->readTrashed()
         );
     }
 
@@ -42,34 +58,67 @@ class MinistryBranchService
 
     public function assignManager($branch, $employee)
     {
-        $this->cacheManager->clearBranch($branch->id);
+        if ($employee->ministry_id !== $branch->ministry_id) {
+            throw new \Exception(__('messages.employee_ministry_mismatch'));
+        }
 
-        $branch = $this->dao->assignManager($branch, $employee->id);
-        $employee->user->syncRoles(['employee', 'branch_manager']);
-        $employee->user->update(['role' => 'branch_manager']);
-        return $branch;
+        return DB::transaction(function () use ($branch, $employee) {
+            $branch = $this->dao->assignManager($branch, $employee->id);
+
+            $employee->user->update(['role' => 'branch_manager']);
+            $employee->user->syncRoles(['employee', 'branch_manager']);
+
+            $this->cacheManager->clearBranch($branch->id);
+            return $branch->fresh();
+        });
     }
 
     public function removeManager($branch)
     {
-        $this->cacheManager->clearBranch($branch->id);
+        if (!$branch->manager_id) {
+            throw new Exception(__('messages.manager_removed_failed'), 409);
+        }
 
-        $employee = Employee::find($branch->manager_id);
-        $employee->user->update(['role' => 'employee']);
-        $employee->user->assignRole('employee');
-        $branch = $this->dao->removeManager($branch);
-        return $branch;
+        return DB::transaction(function () use ($branch) {
+            $employee = Employee::find($branch->manager_id);
+            if ($employee) {
+                $employee->user->update(['role' => 'employee']);
+                $employee->user->syncRoles(['employee']);
+            }
+            $branch = $this->dao->removeManager($branch);
+
+            $this->cacheManager->clearBranch($branch->id);
+            $this->cacheManager->clearBranches();
+
+            return $branch->fresh();
+        });
     }
 
     public function update(MinistryBranch $branch, $data)
     {
-        return DB::transaction(function () use ($branch, $data) {
-            return $this->dao->update($branch, $data);
+        $branchData = collect($data)
+            ->only('ministry_id', 'governorate_id')
+            ->filter(fn($value) => $value != null)
+            ->toArray();
+
+        $translations = $data['translations'];
+        return DB::transaction(function () use ($branch, $branchData, $translations) {
+            $ministryId = $branchData['ministry_id'] ?? $branch->ministry_id;
+
+            $updatedBranch = $this->dao->update($branch, $branchData, $translations);
+
+            $this->cacheManager->clearBranches();
+            $this->cacheManager->clearMinistryBranches($ministryId);
+
+            return $updatedBranch;
         });
     }
 
     public function delete(MinistryBranch $branch)
     {
+        $this->cacheManager->clearBranches();
+        $this->cacheManager->clearMinistryBranches($branch->ministry_id);
+        $this->cacheManager->clearBranchesTrashed();
         return $this->dao->delete($branch);
     }
 }

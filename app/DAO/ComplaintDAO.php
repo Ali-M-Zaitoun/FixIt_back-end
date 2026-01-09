@@ -42,21 +42,19 @@ class ComplaintDAO
 
     public function lock($complaint, $emp_id)
     {
-        $complaint->update([
+        return $complaint->update([
             'locked_by' => $emp_id,
-            'locked_at' => now()
+            'locked_at' => now(),
+            'status'    => 'in_progress'
         ]);
-        return $complaint;
     }
 
-    public function unlock($id)
+    public function unlock(Complaint $complaint)
     {
-        $complaint = $this->readOne($id);
-        $complaint->update([
+        return $complaint->update([
             'locked_by' => null,
             'locked_at' => null
         ]);
-        return $complaint;
     }
 
     public function updateStatus($complaint, $status, $message)

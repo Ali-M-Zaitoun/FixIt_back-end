@@ -17,8 +17,8 @@ class Reply extends Model
         'sender_type',
         'sender_id'
     ];
-
     public function complaint()
+
     {
         return $this->belongsTo(Complaint::class);
     }

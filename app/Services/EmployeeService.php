@@ -3,48 +3,44 @@
 namespace App\Services;
 
 use App\DAO\EmployeeDAO;
-use App\Http\Requests\BaseUserRequest;
-use App\Http\Resources\EmployeeResource;
-use App\Models\MinistryBranch;
-use App\Models\User;
-use App\Models\UserOTP;
+use App\Exceptions\MinistryMismatchException;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class EmployeeService
 {
     public function __construct(
         protected EmployeeDAO $dao,
         protected OTPService $otpService,
-        protected CacheManagerService $cacheManager
+        protected CacheManagerService $cacheManager,
+        protected MinistryBranchService $ministryBranchService
     ) {}
 
-    public function store($data, MinistryBranchService $ministryBranchService)
+    public function store($data)
     {
-        $dataUser = Arr::only($data, ['first_name', 'last_name', 'email', 'phone', 'role', 'address']);
-        $dataUser['password'] = bcrypt($dataUser['first_name'] . '12345');
+        $this->validateMinistryBranch($data['ministry_id'] ?? null, $data['ministry_branch_id'] ?? null);
 
-        $ministryId = $data['ministry_id'] ?? null;
-        $branchId   = $data['ministry_branch_id'] ?? null;
+        return DB::transaction(function () use ($data) {
+            $dataUser = Arr::only($data, ['first_name', 'last_name', 'email', 'phone', 'role', 'address']);
+            $dataUser['password'] = bcrypt($dataUser['first_name'] . '12345');
+            $dataUser['status'] = true;
 
-        if ($branchId) {
-            $branch = $ministryBranchService->readOne($branchId);
-            if ($branch->ministry_id != $ministryId) {
-                return [
-                    'status' => false,
-                ];
+            $user = $this->dao->store($data, $dataUser);
+
+            $user->syncRoles($data['role']);
+
+            return $user->employee;
+        });
+    }
+
+    private function validateMinistryBranch($ministry_id, $ministry_branch_id)
+    {
+        if ($ministry_branch_id) {
+            $branch = $this->ministryBranchService->readOne($ministry_branch_id);
+            if ($branch->ministry_id != $ministry_id) {
+                throw new MinistryMismatchException();
             }
         }
-
-        $dataUser['status'] = true;
-        $user = $this->dao->store($data, $dataUser);
-        $user->syncRoles($data['role']);
-
-        return [
-            'status' => true,
-            'user' => $user
-        ];
     }
 
     public function read()
@@ -52,6 +48,18 @@ class EmployeeService
         return $this->cacheManager->getEmployees(
             fn() => $this->dao->read()
         );
+    }
+
+    public function readTrashed()
+    {
+        return $this->cacheManager->getTrashedEmployees(
+            fn() => $this->dao->readTrashed()
+        );
+    }
+
+    public function readOne($id)
+    {
+        return $this->dao->readOne($id);
     }
 
     public function getByBranch($branch_id)
@@ -70,39 +78,9 @@ class EmployeeService
         );
     }
 
-    public function readOne($id)
+    public function delete($employee)
     {
-        return $this->dao->readOne($id);
+        $this->cacheManager->clearEmployees();
+        return $this->dao->delete($employee);
     }
-
-    // public function promoteEmployee($id, $new_role, $new_end_date = null)
-    // {
-    //     $employee = $this->dao->readOne($id);
-    //     $user = Auth::user();
-
-    //     $promotionRules = [
-    //         'ministry_manager' => [
-    //             'allowed_roles' => ['super_admin'],
-    //             'sync_roles'    => ['employee', 'ministry_manager'],
-    //         ],
-    //         'branch_manager' => [
-    //             'allowed_roles' => ['super_admin', 'ministry_manager'],
-    //             'sync_roles'    => ['employee', 'branch_manager'],
-    //         ],
-    //     ];
-
-    //     if (!isset($promotionRules[$new_role])) {
-    //         throw new \Exception(__('messages.invalid_promotion_position'), 403);
-    //     }
-
-    //     $allowedRoles = $promotionRules[$new_role]['allowed_roles'];
-    //     if (!$user->hasAnyRole($allowedRoles)) {
-    //         throw new \Exception(__('messages.unauthorized_promotion'), 403);
-    //     }
-
-    //     $updatedEmployee = $this->dao->updatePosition($employee, $new_role, $new_end_date);
-    //     $updatedEmployee->user->syncRoles($promotionRules[$new_role]['sync_roles']);
-
-    //     return $updatedEmployee;
-    // }
 }

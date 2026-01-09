@@ -6,14 +6,11 @@ use App\Models\Ministry;
 
 class MinistryDAO
 {
-    public function store($data)
+    public function store(array $ministryData, array $translations)
     {
-        $ministry = Ministry::create([
-            'abbreviation' => $data['abbreviation'],
-            'status'       => true
-        ]);
+        $ministry = Ministry::create($ministryData);
 
-        foreach ($data['translations'] as $locale => $trans) {
+        foreach ($translations as $locale => $trans) {
             $ministry->translations()->create([
                 'locale'      => $locale,
                 'name'        => $trans['name'],
@@ -28,27 +25,27 @@ class MinistryDAO
         return Ministry::all();
     }
 
-    public function update(Ministry $ministry, $data)
+    public function readTrashed()
     {
-        $ministry->update(
-            collect($data)
-                ->only(['status', 'abbreviation'])
-                ->filter(fn($value) => $value != null)
-                ->toArray()
-        );
+        return Ministry::onlyTrashed()->get();
+    }
 
-        if (isset($data['translations'])) {
-            foreach ($data['translations'] as $locale => $trans) {
-                $values = ['name' => $trans['name']];
-                if (array_key_exists('description', $trans))
-                    $values['description'] = $trans['description'];
+    public function update(Ministry $ministry, array $ministryData, array $translations = [])
+    {
+        $ministry->update($ministryData);
 
-                $ministry->translations()->updateOrCreate(
-                    ['locale' => $locale],
-                    $values
-                );
-            }
+        foreach ($translations as $locale => $trans) {
+            $values = ['name' => $trans['name']];
+
+            if (array_key_exists('description', $trans))
+                $values['description'] = $trans['description'];
+
+            $ministry->translations()->updateOrCreate(
+                ['locale' => $locale],
+                $values
+            );
         }
+        return $ministry;
     }
 
     public function delete(Ministry $ministry)

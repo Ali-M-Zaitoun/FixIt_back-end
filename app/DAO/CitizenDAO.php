@@ -18,19 +18,11 @@ class CitizenDAO
 
     public function findById($id)
     {
-        return Citizen::where('id', $id)->first();
+        return Citizen::find($id);
     }
 
-    public function completeInfo($id, array $data)
+    public function delete($citizen)
     {
-        $citizen = $this->findById($id);
-        $citizen->fill([
-            'national_id' => $data['national_id'] ?? $citizen->national_id,
-            'nationality' => $data['nationality'] ?? $citizen->nationality,
-        ]);
-
-        if ($citizen->isDirty()) {
-            $citizen->save();
-        }
+        return $citizen->delete();
     }
 }

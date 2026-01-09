@@ -7,6 +7,7 @@ use App\DAO\RefreshTokenDAO;
 use App\DAO\UserDAO;
 use App\DAO\UserOtpDAO;
 use App\Events\OTPEvent;
+use App\Models\User;
 use App\Traits\Loggable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,15 +15,14 @@ use Illuminate\Support\Str;
 
 class UserService
 {
-    use Loggable;
-
     public function __construct(
         protected UserDAO $userDAO,
         protected UserOtpDAO $otpDAO,
         protected RefreshTokenDAO $refreshTokenDAO,
         protected CitizenDAO $citizenDAO,
         protected CitizenService $citizenService,
-        protected FileManagerService $fileManagerService
+        protected FileManagerService $fileManagerService,
+        protected CacheManagerService $cacheManager
     ) {}
 
     public function signUp(array $data)
@@ -31,27 +31,22 @@ class UserService
             $data['role'] = 'citizen';
             $user = $this->userDAO->store($data);
 
-            $citizenData = [
-                'nationality'   => $data['nationality'],
-                'national_id'   => $data['national_id']
-            ];
-
-            $otp = rand(100000, 999999);
-            $expiresAt = now()->addMinutes(5);
             if (isset($data['img'])) {
-                $img = $data['img'];
-                unset($data['img']);
-                $this->uploadProfileImage($img, $user);
+                $this->uploadProfileImage($data['img'], $user);
             }
 
-            unset($data['national_id'], $data['nationality']);
-
-            $this->otpDAO->store($user->id, $otp, $expiresAt);
+            $otp = rand(100000, 999999);
+            $this->otpDAO->store($user->id, $otp, now()->addMinutes(5));
 
             $user->assignRole('citizen');
-            $this->citizenDAO->store($user, $citizenData);
+
+            $this->citizenDAO->store($user, [
+                'nationality' => $data['nationality'],
+                'national_id' => $data['national_id']
+            ]);
 
             event(new OTPEvent($otp, $user->email));
+
             return [
                 'user_id' => $user->id,
                 'otp_sent' => true,
@@ -128,17 +123,22 @@ class UserService
         return $tokens;
     }
 
-    public function update($id, $data)
+    public function update(User $user, $data)
     {
-        $user = $this->userDAO->findById($id);
-        if (!$user) {
-            return false;
-        }
+        return DB::transaction(function () use ($user, $data) {
+            if (!empty($data['img'])) {
+                $this->updateProfileImage($data['img'], $user);
+            }
 
-        if (!empty($data['img']))
-            $this->updateProfileImage($data['img'], $user);
+            $this->userDAO->update($user, $data);
 
-        return $this->userDAO->update($user, $data);
+            if ($user->citizen) {
+                $this->cacheManager->clearCitizenProfile($user->citizen->id);
+                $this->cacheManager->clearCitizens();
+            }
+
+            return $user->fresh();
+        });
     }
 
     public function deleteProfileImage($user)
@@ -166,10 +166,17 @@ class UserService
 
     public function updateProfileImage($img, $user)
     {
-        $status = $this->deleteProfileImage($user);
-        if ($status) {
-            $user->image()->delete();
-        }
-        return $this->uploadProfileImage($img, $user) ? true : false;
+        return DB::transaction(function () use ($img, $user) {
+            if ($user->image) {
+                $this->fileManagerService->deleteFile($user, $user->image->id, 'image');
+                $user->image()->delete();
+            }
+
+            $this->uploadProfileImage($img, $user);
+
+            // $this->cacheManager->clearUserRelatedCache($user);
+
+            return $user->fresh(['image']);
+        });
     }
 }

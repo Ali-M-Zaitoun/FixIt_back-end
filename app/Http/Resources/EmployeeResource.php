@@ -20,6 +20,7 @@ class EmployeeResource extends JsonResource
                 'abbreviation'   => $this->ministry->abbreviation,
             ],
             'ministry_branch_id' => $this->ministry_branch_id,
+            'user_info'          => new UserResource($this->user)
         ];
     }
 }

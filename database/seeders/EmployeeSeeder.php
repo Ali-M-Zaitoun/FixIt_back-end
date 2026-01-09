@@ -21,7 +21,7 @@ class EmployeeSeeder extends Seeder
         $syrianPhonePrefixes = ['093', '094', '095', '096', '098', '099'];
 
         foreach ($branches as $branch) {
-            for ($i = 1; $i <= 4; $i++) {
+            for ($i = 1; $i <= 1; $i++) {
                 $firstName = $faker->randomElement($syrianFirstNames);
                 $lastName = $faker->randomElement($syrianSurnames);
                 $role = ($i === 1) ? 'branch_manager' : 'employee';

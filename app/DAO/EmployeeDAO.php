@@ -30,14 +30,9 @@ class EmployeeDAO
         return Employee::all();
     }
 
-    public function updatePosition($employee, $new_position, $new_end_date = null)
+    public function readTrashed()
     {
-        $employee->position = $new_position;
-        if ($new_end_date) {
-            $employee->end_date = $new_end_date;
-        }
-        $employee->save();
-        return $employee;
+        return Employee::onlyTrashed()->get();
     }
 
     public function getByBranch($branch_id)
@@ -48,5 +43,10 @@ class EmployeeDAO
     public function getByMinistry($ministry_id)
     {
         return Employee::where('ministry_id', $ministry_id)->get();
+    }
+
+    public function delete($employee)
+    {
+        return $employee->delete();
     }
 }
