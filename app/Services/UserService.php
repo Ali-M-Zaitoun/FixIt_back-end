@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 
 class UserService
 {
+    use Loggable;
     public function __construct(
         protected UserDAO $userDAO,
         protected UserOtpDAO $otpDAO,

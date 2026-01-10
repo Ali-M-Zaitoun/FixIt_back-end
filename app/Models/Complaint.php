@@ -27,7 +27,6 @@ class Complaint extends Model
         'locked_at'
     ];
 
-
     public function media()
     {
         return $this->morphMany(Media::class, 'mediable');
