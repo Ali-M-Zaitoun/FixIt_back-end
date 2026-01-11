@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\MinistryRequest;
+use App\Http\Resources\V1\MinistryResourcForMobile;
 use App\Http\Resources\V1\GovernorateResource;
 use App\Http\Resources\V1\MinistryResource;
 use App\Models\Employee;
@@ -38,7 +39,7 @@ class MinistryController extends Controller
 
         return $this->successCollection(
             $data,
-            MinistryResource::class,
+            MinistryResourcForMobile::class,
             'messages.ministries_retrieved'
         );
     }
@@ -63,7 +64,7 @@ class MinistryController extends Controller
 
     public function readOne(Ministry $ministry)
     {
-        return $this->successResponse(new MinistryResource($ministry), __('messages.ministry_retrieved'), 200);
+        return $this->successResponse(new MinistryResourcForMobile($ministry), __('messages.ministry_retrieved'), 200);
     }
 
     public function assignManager(Ministry $ministry, Employee $employee)

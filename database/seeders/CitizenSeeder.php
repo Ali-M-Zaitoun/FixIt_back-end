@@ -18,7 +18,7 @@ class CitizenSeeder extends Seeder
         $syrianFirstNames = ['أحمد', 'محمد', 'سامر', 'لينا', 'مازن', 'رنا', 'خالد', 'منى', 'ياسر', 'هبة', 'عمر', 'ريم'];
         $syrianPhonePrefixes = ['093', '094', '095', '096', '098', '099'];
 
-        for ($i = 1; $i <= 200; $i++) {
+        for ($i = 1; $i <= 100; $i++) {
             $firstName = $faker->randomElement($syrianFirstNames);
             $lastName = $faker->randomElement($syrianSurnames);
 

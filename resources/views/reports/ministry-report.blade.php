@@ -3,60 +3,163 @@
 
 <head>
     <meta charset="UTF-8">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        /* بديل Tailwind البسيط للـ PDF */
         body {
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Arial', sans-serif;
+            direction: rtl;
+            background-color: white;
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 30px;
+            border-bottom: 4px solid #0f172a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .stats-box {
+            margin: 30px;
+            text-align: center;
+            background-color: #0f172a;
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .stats-label {
+            color: #60a5fa;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stats-value {
+            font-size: 48px;
+            font-weight: 900;
+            margin: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        th {
+            padding: 12px;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 10px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+        }
+
+        .branch-en {
+            font-size: 10px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .bg-blue-50 {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+
+        .footer {
+            padding: 15px;
+            background-color: #f8fafc;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: bold;
         }
     </style>
 </head>
 
-<body class="bg-white p-4">
-    <div class="max-w-5xl mx-auto border border-gray-200 rounded-lg overflow-hidden">
-        <div class="p-8 border-b-4 border-slate-800 flex justify-between items-center">
+<body>
+    <div class="container">
+        <div class="header">
             <div>
-                <h1 class="text-2xl font-black text-slate-800">ملخص الوزارة التنفيذي</h1>
-                <h2 class="text-sm text-slate-500 uppercase tracking-widest">Ministry Executive Summary</h2>
+                <h1 class="title">ملخص الوزارة التنفيذي</h1>
+                <div class="subtitle">Ministry Executive Summary</div>
             </div>
-            <div class="text-left font-bold text-slate-400 text-xs">{{ $ministryAr }} / {{ $ministryEn }}</div>
+            <div style="color: #94a3b8; font-size: 12px; font-weight: bold;">
+                {{ $ministryAr }} / {{ $ministryEn }}
+            </div>
         </div>
 
-        <div class="p-8">
-            <div class="mb-10 text-center bg-slate-900 text-white p-6 rounded-xl">
-                <p class="text-blue-400 text-xs font-bold uppercase mb-2">إجمالي الشكاوى بالوزارة / Total Ministry Complaints</p>
-                <h1 class="text-5xl font-black">{{ $total }}</h1>
-            </div>
+        <div class="stats-box">
+            <p class="stats-label">إجمالي الشكاوى بالوزارة / Total Ministry Complaints</p>
+            <h1 class="stats-value">{{ $total }}</h1>
+        </div>
 
-            <table class="w-full text-right">
+        <div style="padding: 0 30px 30px 30px;">
+            <table>
                 <thead>
-                    <tr class="text-[10px] font-bold text-slate-400 uppercase border-b-2">
-                        <th class="pb-3">الفرع / Branch</th>
-                        <th class="pb-3 text-center">جديد / New</th>
-                        <th class="pb-3 text-center">قيد التنفيذ / Progress</th>
-                        <th class="pb-3 text-center">مكتمل / Resolved</th>
-                        <th class="pb-3 text-center">مرفوض / Rejected</th>
+                    <tr>
+                        <th>الفرع / Branch</th>
+                        <th class="text-center">جديد / New</th>
+                        <th class="text-center">قيد التنفيذ / Progress</th>
+                        <th class="text-center">مكتمل / Resolved</th>
+                        <th class="text-center">مرفوض / Rejected</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y text-sm">
+                <tbody>
                     @foreach($branches as $b)
                     <tr>
-                        <td class="py-4">
-                            <p class="font-bold">{{ $b->name_ar }}</p>
-                            <p class="text-[10px] text-slate-400 uppercase">{{ $b->name_en }}</p>
+                        <td>
+                            <div class="font-bold">{{ $b->name_ar }}</div>
+                            <div class="branch-en">{{ $b->name_en }}</div>
                         </td>
-                        <td class="text-center font-bold text-blue-600 bg-blue-50">{{ $b->new }}</td>
-                        <td class="text-center font-bold text-yellow-600">{{ $b->progress }}</td>
-                        <td class="text-center font-bold text-green-600">{{ $b->resolved }}</td>
-                        <td class="text-center font-bold text-red-600">{{ $b->rejected }}</td>
+                        <td class="text-center font-bold bg-blue-50">{{ $b->new }}</td>
+                        <td class="text-center font-bold" style="color: #ca8a04;">{{ $b->progress }}</td>
+                        <td class="text-center font-bold" style="color: #16a34a;">{{ $b->resolved }}</td>
+                        <td class="text-center font-bold" style="color: #dc2626;">{{ $b->rejected }}</td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
-        <div class="p-4 bg-slate-50 text-center border-t">
-            <p class="text-[10px] text-slate-400 font-bold uppercase">CONFIDENTIAL - للموظفين المصرح لهم فقط</p>
-        </div>
+        <div class="footer">CONFIDENTIAL - للموظفين المصرح لهم فقط</div>
     </div>
 </body>
 

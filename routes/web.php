@@ -17,4 +17,11 @@ Route::get('/whoami', function () {
     ];
 });
 
-Route::get('downloadReport/{complaint}', [ComplaintController::class, 'downloadReport']);
+// Route::get('downloadReport/{complaint}', [ComplaintController::class, 'downloadReport']);
+
+use Spatie\Browsershot\Browsershot;
+
+Route::get('/test-pdf', function () {
+    Browsershot::html('<h1>Hello World</h1>')->save('test.pdf');
+    return "Done";
+});

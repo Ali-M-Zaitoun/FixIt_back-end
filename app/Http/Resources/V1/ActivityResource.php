@@ -25,7 +25,7 @@ class ActivityResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'timestamp' => $this->created_at->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at->format('Y-m-d H:i:s A'),
             'action' => $this->description,
             'subject' => [
                 'type' => $this->subject_type,

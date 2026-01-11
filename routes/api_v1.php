@@ -16,25 +16,21 @@ use App\Http\Controllers\V1\UserOTPController;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(UserController::class)->group(function () {
-    Route::post('sign-up', 'signUp');
-    Route::post('login', 'login');
     Route::post('refresh-token', 'refreshToken');
-    Route::post('logout', 'logout')->middleware('auth:sanctum');
     Route::post('updateInfo', 'update')->middleware('auth:sanctum');
 
     Route::post('upload-profile-img', 'uploadProfileImage')->middleware('auth:sanctum');
     Route::delete('delete-profile-img', 'deleteProfileImage')->middleware('auth:sanctum');
 });
 
-Route::post('/fcm-token', [FcmTokenController::class, 'store'])
-    ->middleware('auth:sanctum');
+Route::post('/fcm-token', [FcmTokenController::class, 'store'])->middleware('auth:sanctum');
 Route::post('testNotification', [FcmTokenController::class, 'testNotification'])->middleware('auth:sanctum');
 Route::get('my_tokens', [FcmTokenController::class, 'my_tokens'])->middleware('auth:sanctum');
-
 
 Route::get('getLog', [ActivityController::class, 'getLog'])->middleware('auth:sanctum');
 Route::post('verify-otp', [UserOTPController::class, 'verifyOtp']);
 Route::post('resend-otp', [UserOTPController::class, 'resendOtp']);
+
 
 Route::prefix('complaint')
     ->middleware(['auth:sanctum', 'active.user'])
@@ -108,8 +104,8 @@ Route::prefix('employee')->middleware(['auth:sanctum', 'active.user'])->controll
     Route::get('readAll', 'readAll')->middleware('permission:employee.read');
 
     Route::get('readOne/{employee}', 'readOne')->middleware('permission:employee.read');
-    Route::get('getByBranch/{branch_id}', 'getByBranch')->middleware('permission:employee.read');
-    Route::get('getByMinistry/{ministry_id}', 'getByMinistry')->middleware('permission:employee.read');
+    Route::get('getByBranch/{branch}', 'getByBranch')->middleware('permission:employee.read');
+    Route::get('getByMinistry/{ministry}', 'getByMinistry')->middleware('permission:employee.read');
     Route::delete('delete/{employee}', 'delete');
 });
 

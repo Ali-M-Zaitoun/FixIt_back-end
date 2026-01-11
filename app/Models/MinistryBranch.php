@@ -23,7 +23,7 @@ class MinistryBranch extends Model
 
     public function manager()
     {
-        return $this->belongsTo(Employee::class, 'manager_id')->withTrashed();
+        return $this->belongsTo(Employee::class, 'manager_id');
     }
 
     public function employees()
@@ -36,7 +36,7 @@ class MinistryBranch extends Model
         return $this->hasMany(MinistryBranchTranslation::class);
     }
 
-    public function translation($locale)
+    public function translation($locale = null)
     {
         $locale = $locale ?: app()->getLocale();
         return $this->translations->where('locale', $locale)->first();

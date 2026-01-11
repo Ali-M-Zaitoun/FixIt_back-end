@@ -39,7 +39,7 @@ class EmployeeController extends Controller
 
         return $this->successResponse(
             EmployeeResource::collection($data),
-            $data->isEmpty() ? __('messages.employees_retrieved') : __('messages.empty')
+            $data->isEmpty() ? __('messages.empty') : __('messages.employees_retrieved')
         );
     }
 
@@ -64,7 +64,7 @@ class EmployeeController extends Controller
 
         return $this->successResponse(
             EmployeeResource::collection($data),
-            $data->isEmpty() ? __('messages.employees_retrieved') : __('messages.empty')
+            $data->isEmpty() ? __('messages.empty') : __('messages.employees_retrieved')
         );
     }
 
@@ -74,7 +74,7 @@ class EmployeeController extends Controller
 
         return $this->successResponse(
             EmployeeResource::collection($data),
-            $data->isEmpty() ? __('messages.employees_retrieved') : __('messages.empty')
+            $data->isEmpty() ? __('messages.empty') : __('messages.employees_retrieved')
         );
     }
 

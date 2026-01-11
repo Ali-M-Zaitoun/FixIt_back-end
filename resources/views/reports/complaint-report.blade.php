@@ -103,7 +103,6 @@
             <h1 style="margin:0; font-size: 20px;">تقرير شكوى رسمي</h1>
             <span style="font-size: 12px; color: var(--secondary);">{{ now()->format('Y/m/d') }}</span>
         </div>
-        <div style="font-weight: bold; color: var(--primary); font-size: 22px;">LOGO</div>
         <div style="text-align: left;" dir="ltr">
             <h1 style="margin:0; font-size: 20px;">Official Complaint Report</h1>
             <span style="font-size: 12px; color: var(--secondary);">#{{ $complaint->reference_number }}</span>

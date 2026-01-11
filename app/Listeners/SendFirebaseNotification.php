@@ -3,16 +3,17 @@
 namespace App\Listeners;
 
 use App\Events\NotificationRequested;
-use App\Models\Citizen;
-use App\Models\Employee;
-use App\Models\User;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 
 class SendFirebaseNotification implements ShouldQueue
 {
     protected $firebase;
+
+    public $timeout = 30;
+    public $tries = 3;
+
     public function __construct(FirebaseNotificationService $firebase)
     {
         $this->firebase = $firebase;
@@ -44,5 +45,10 @@ class SendFirebaseNotification implements ShouldQueue
 
             $this->firebase->sendToToken($token->token, $translatedTitle, $translatedBody, $event->data);
         }
+    }
+
+    public function failed(\Throwable $exception)
+    {
+        Log::error("FCM Job Failed: " . $exception->getMessage());
     }
 }

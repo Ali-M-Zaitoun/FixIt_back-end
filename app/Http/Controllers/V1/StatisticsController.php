@@ -18,10 +18,9 @@ class StatisticsController extends Controller
     use ResponseTrait;
     public function getActivity()
     {
-        $activities = Activity::all();
+        $activities = Activity::orderBy('created_at', 'desc')->get();
         return $this->successResponse(ActivityResource::collection($activities), __('messages.success'));
     }
-
 
     public function statsByStatus()
     {
@@ -42,14 +41,23 @@ class StatisticsController extends Controller
 
     public function statsByMinistryAndBranch()
     {
-        return Complaint::select(
-            'ministry_id',
-            'ministry_branch_id',
-            DB::raw('COUNT(*) as total')
-        )
+        $locale = app()->getLocale();
+
+        $complaints = Complaint::select('ministry_id', 'ministry_branch_id', DB::raw('COUNT(*) as total'))
             ->groupBy('ministry_id', 'ministry_branch_id')
-            ->with(['ministry', 'ministryBranch'])
+            ->with([
+                'ministry.translations',
+                'ministryBranch.translations'
+            ])
             ->get();
+
+        return $complaints->map(function ($item) use ($locale) {
+            return [
+                'ministry' => $item->ministry?->translation($locale)?->name ?? 'N/A',
+                'branch'   => $item->ministryBranch?->translation($locale)?->name ?? 'N/A',
+                'total'    => $item->total,
+            ];
+        });
     }
 
     public function statsByMonth()

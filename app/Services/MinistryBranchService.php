@@ -63,7 +63,7 @@ class MinistryBranchService
         }
 
         return DB::transaction(function () use ($branch, $employee) {
-            $branch = $this->dao->assignManager($branch, $employee->id);
+            $this->dao->assignManager($branch, $employee->id);
 
             $employee->user->update(['role' => 'branch_manager']);
             $employee->user->syncRoles(['employee', 'branch_manager']);
@@ -85,7 +85,7 @@ class MinistryBranchService
                 $employee->user->update(['role' => 'employee']);
                 $employee->user->syncRoles(['employee']);
             }
-            $branch = $this->dao->removeManager($branch);
+            $this->dao->removeManager($branch);
 
             $this->cacheManager->clearBranch($branch->id);
             $this->cacheManager->clearBranches();
@@ -119,6 +119,7 @@ class MinistryBranchService
         $this->cacheManager->clearBranches();
         $this->cacheManager->clearMinistryBranches($branch->ministry_id);
         $this->cacheManager->clearBranchesTrashed();
+
         return $this->dao->delete($branch);
     }
 }

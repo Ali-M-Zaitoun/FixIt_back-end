@@ -31,7 +31,7 @@ class Ministry extends Model
         return $this->hasMany(MinistryTranslation::class);
     }
 
-    public function translation($locale)
+    public function translation($locale = null)
     {
         $locale = $locale ?: app()->getLocale();
         return $this->translations->where('locale', $locale)->first();

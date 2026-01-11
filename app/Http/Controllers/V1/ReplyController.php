@@ -34,10 +34,8 @@ class ReplyController extends Controller
         ]);
 
         $result = $this->replyService->addReply($complaint, $sender, $request->all());
-        if ($result) {
-            return $this->successResponse($result, __('messages.reply_sent'));
-        }
-        return $this->errorResponse(__('messages.reply_failed'));
+
+        return $this->successResponse($result, __('messages.reply_sent'));
     }
 
     public function read(Complaint $complaint)
@@ -45,9 +43,12 @@ class ReplyController extends Controller
         $this->authorize('view', $complaint);
 
         $result = $this->replyService->read($complaint);
-        if ($result->isEmpty())
-            return $this->successResponse([], __('messages.empty'));
-        return $this->successResponse(ReplyResource::collection($result), __('messages.replies_retrieved'));
+
+        return $this->successResponse(
+            ReplyResource::collection($result),
+            $result->isEmpty() ? __('messages.empty') :
+                __('messages.replies_retrieved')
+        );
     }
 
     public function delete(Reply $reply)
@@ -55,10 +56,6 @@ class ReplyController extends Controller
         $this->authorize('viewReply', $reply);
 
         $reply = $this->replyService->delete($reply);
-        if ($reply) {
-            return $this->successResponse([], __('messages.deleted_successfully'));
-        }
-
-        return $this->errorResponse(__('messages.not_found'), 404);
+        return $this->successResponse([], __('messages.deleted_successfully'));
     }
 }

@@ -41,7 +41,7 @@ class ReportController extends Controller
 
     public function downloadBranchReport(MinistryBranch $branch)
     {
-        $complaints = $this->complaintService->getByBranch($branch->id);
+        $complaints = $this->complaintService->getByBranch($branch);
 
         $user = $branch?->manager?->user;
         $manager = $user?->first_name . ' ' . $user?->last_name;
@@ -51,7 +51,7 @@ class ReportController extends Controller
         $Ids = $complaints->pluck('id')->unique()->values()->toArray();
 
         $logs = Activity::where('subject_type', 'Complaint')
-            ->whereIn('subject_id', $Ids)->get();
+            ->whereIn('subject_id', $Ids)->orderBy('created_at', 'desc')->take(10)->get();
 
         $data = [
             'branch'     => $branch,
@@ -72,7 +72,7 @@ class ReportController extends Controller
 
     public function downloadMinistryReport(Ministry $ministry)
     {
-        $allComplaints = $this->complaintService->getByMinistry($ministry->id);
+        $allComplaints = $this->complaintService->getByMinistry($ministry);
 
         $reportBranches = $ministry->branches->map(function ($branch) use ($allComplaints) {
             $branchComplaints = $allComplaints->where('ministry_branch_id', $branch->id);

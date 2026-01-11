@@ -184,45 +184,46 @@ class ComplaintService
             throw new ComplaintLockedByOtherException();
         }
 
+        DB::transaction(function () use ($complaint, $status, $reason, $employee) {
+            $originalLocale = app()->getLocale();
 
-        $originalLocale = app()->getLocale();
+            $messageKey = $status === 'resolved'
+                ? 'complaint_resolved'
+                : 'complaint_rejected';
 
-        $messageKey = $status === 'resolved'
-            ? 'complaint_resolved'
-            : 'complaint_rejected';
+            $message = __(
+                "messages.$messageKey",
+                ['reason' => $reason]
+            );
 
-        $message = __(
-            "messages.$messageKey",
-            ['reason' => $reason]
-        );
+            app()->setLocale('ar');
 
-        app()->setLocale('ar');
+            $complaint = $this->complaintDAO->updateStatus($complaint, $status, $messageKey);
 
-        $complaint = $this->complaintDAO->updateStatus($complaint, $status, $messageKey);
+            app()->setLocale($originalLocale);
 
-        app()->setLocale($originalLocale);
+            activity()
+                ->performedOn($complaint)
+                ->event($status)
+                ->log($message);
 
-        activity()
-            ->performedOn($complaint)
-            ->event($status)
-            ->log($message);
+            $this->cacheManager->clearComplaintCache(
+                citizenId: $complaint->citizen_id,
+                branchId: $complaint?->ministry_branch_id,
+                ministryId: $complaint->ministry_id,
+                single: $complaint->id
+            );
 
-        $this->cacheManager->clearComplaintCache(
-            citizenId: $complaint->citizen_id,
-            branchId: $complaint?->ministry_branch_id,
-            ministryId: $complaint->ministry_id,
-            single: $complaint->id
-        );
+            event(new NotificationRequested(
+                $complaint->citizen->user,
+                'complaint_status_changed',
+                $messageKey,
+                $complaint->reference_number,
+                ['reason' => $reason]
+            ));
 
-        event(new NotificationRequested(
-            $complaint->citizen->user,
-            'complaint_status_changed',
-            $messageKey,
-            $complaint->reference_number,
-            ['reason' => $reason]
-        ));
-
-        $this->replyDAO->addReply($complaint->id, $employee, $message);
+            $this->replyDAO->addReply($complaint->id, $employee, $message);
+        });
     }
 
     public function startProcessing(Complaint $complaint, Employee $employee): void
@@ -249,7 +250,8 @@ class ComplaintService
             $complaint->citizen->user,
             'complaint_status_changed',
             'complaint_in_progress_body',
-            $complaint->reference_number
+            $complaint->reference_number,
+            []
         ));
 
         $complaint->update(['status' => 'in_progress']);
